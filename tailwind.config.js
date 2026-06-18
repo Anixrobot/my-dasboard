@@ -1,0 +1,56 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-surface": "#c1ecff",
+        "on-error": "#490006",
+        "on-secondary": "#003e4f",
+        "error-container": "#9f0519",
+        "on-tertiary-container": "#001f49",
+        "on-primary": "#00343d",
+        "surface-dim": "#001017",
+        "surface-container-lowest": "#000b14",
+        "on-secondary-container": "#eff9ff",
+        "primary-container": "#02dcfd",
+        "inverse-surface": "#f3faff",
+        "surface-container-high": "#00232e",
+        "background": "#001017",
+        "primary-dim": "#00cdec",
+        "on-surface-variant": "#81b2c6",
+        "surface": "#001017",
+        "outline": "#4b7c8f",
+        "inverse-primary": "#006979",
+        "secondary": "#00cbfc",
+        "error-dim": "#d7383b",
+        "primary": "#7ae6ff",
+        "surface-variant": "#002a36",
+        "surface-tint": "#7ae6ff",
+        "surface-container": "#001d26",
+        "border-glass": "rgba(122, 230, 255, 0.15)",
+        "finance-accent": "#10b981", 
+        "error": "#ff716c",
+        "surface-deep": "#000b14",
+        "surface-bright": "#00313e",
+      },
+      fontFamily: {
+        "section-title": ["Archivo Narrow", "sans-serif"],
+        "headline-display": ["Archivo Narrow", "sans-serif"],
+        "body-base": ["Atkinson Hyperlegible Next", "sans-serif"],
+        "headline-lg": ["Archivo Narrow", "sans-serif"],
+        "data-mono": ["Anybody", "sans-serif"],
+        "body-sm": ["Atkinson Hyperlegible Next", "sans-serif"],
+        "label-caps": ["Anybody", "sans-serif"],
+      },
+      spacing: {
+        "gutter": "1.5rem",
+      }
+    },
+  },
+  plugins: [],
+}
