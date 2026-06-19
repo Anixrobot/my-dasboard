@@ -129,36 +129,14 @@ function App() {
   const totalKekayaanIDR = tabunganBalance + gtNetIDR;
   const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
-  // ================= 2. PLANNER & NOTIFICATION LOGIC =================
+  // ================= 2. PLANNER LOGIC =================
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dailyTasks, setDailyTasks] = useState([]);
   const [newDailyTaskName, setNewDailyTaskName] = useState('');
   const [allPageTasks, setAllPageTasks] = useState([]); 
   const monthKey = format(currentMonth, 'yyyy_MM');
-  const monthlyTodos = (blocks || []).filter(b => b.type === `monthly_todo_${monthKey}`);
-  const monthlyNotes = (blocks || []).filter(b => b.type === `monthly_note_${monthKey}`);
   const [newMonthlyTodo, setNewMonthlyTodo] = useState('');
-
-  useEffect(() => {
-    if ("Notification" in window && Notification.permission !== "denied") Notification.requestPermission();
-  }, []);
-
-  useEffect(() => {
-    if (allPageTasks.length > 0 && "Notification" in window && Notification.permission === "granted") {
-      const todayStr = format(new Date(), 'yyyy-MM-dd');
-      const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
-      const todayTasks = allPageTasks.filter(t => t.task_date === todayStr && !t.is_completed);
-      const tomorrowTasks = allPageTasks.filter(t => t.task_date === tomorrowStr && !t.is_completed);
-      const lastNotified = localStorage.getItem('last_notified_date');
-      
-      if (lastNotified !== todayStr) {
-        if (todayTasks.length > 0) new Notification("🔔 Agenda Hari Ini!", { body: `Ada ${todayTasks.length} agenda: ${todayTasks.map(t=>t.task_name).join(', ')}` });
-        if (tomorrowTasks.length > 0) setTimeout(() => { new Notification("📅 Info Besok!", { body: `Besok ada ${tomorrowTasks.length} agenda: ${tomorrowTasks.map(t=>t.task_name).join(', ')}` }); }, 2500);
-        localStorage.setItem('last_notified_date', todayStr);
-      }
-    }
-  }, [allPageTasks]);
 
   // ================= 3. STATISTIK =================
   const activePage = (pages || []).find(p => p.id === activePageId);
@@ -203,18 +181,13 @@ function App() {
       labels = ['Target & Checklist', 'Daily Tasks'];
       chartData = [blocksPercent, calcPercent(allPageTasks)]; barColor = '#00c8f9';
     }
-    
-    const maxColor = '#10b981';
-    const gridColor = 'rgba(122,230,255,0.1)';
-    const tickColor = '#879396';
-
     const myChart = new Chart(chartRef.current, {
       type: 'bar',
-      data: { labels: labels, datasets: [{ label: `Progres (%)`, data: chartData, backgroundColor: chartData.map(val => val === 100 ? maxColor : barColor), borderRadius: 4, barThickness: isMobile ? 12 : 24 }] },
-      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: gridColor }, ticks: { color: tickColor, callback: (value) => value + '%' } }, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 45, minRotation: 45} } }, plugins: { legend: { display: false } } }
+      data: { labels: labels, datasets: [{ label: `Progres (%)`, data: chartData, backgroundColor: chartData.map(val => val === 100 ? '#10b981' : barColor), borderRadius: 4, barThickness: window.innerWidth < 768 ? 12 : 24 }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(122,230,255,0.1)' }, ticks: { color: '#879396', callback: (value) => value + '%' } }, x: { grid: { display: false }, ticks: { color: '#879396', maxRotation: 45, minRotation: 45} } }, plugins: { legend: { display: false } } }
     });
     return () => { myChart.destroy(); };
-  }, [allPageTasks, blocks, isStatsEnabled, statsView, isMobile]);
+  }, [allPageTasks, blocks, isStatsEnabled, statsView]);
 
   // ================= 4. CHART TRADING VIEW =================
   const financeChartRef = useRef(null);
@@ -235,31 +208,23 @@ function App() {
       });
     }
 
-    const isOverallProfit = runTotalIDR >= 0;
-    
-    // DESKTOP & MOBILE SEKARANG PAKE WARNA CYBERPUNK YANG SAMA
-    const chartColor = isOverallProfit ? '#10b981' : '#ffb4ab'; 
     const grad = ctx.createLinearGradient(0, 0, 0, 400);
-    grad.addColorStop(0, isOverallProfit ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 180, 171, 0.4)'); 
-    grad.addColorStop(1, isOverallProfit ? 'rgba(16, 185, 129, 0)' : 'rgba(255, 180, 171, 0)');
-    const bgColor = grad;
-    const gridColor = 'rgba(122,230,255,0.1)';
-    const tickColor = '#879396';
+    grad.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); grad.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
     const myFinanceChart = new Chart(financeChartRef.current, {
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{ label: 'Net Worth (IDR)', data: dataTotal, borderColor: chartColor, backgroundColor: bgColor, borderWidth: 3, fill: true, pointRadius: isMobile ? 0 : 4, pointHoverRadius: 6, pointBackgroundColor: chartColor, tension: 0 }]
+        datasets: [{ label: 'Net Worth (IDR)', data: dataTotal, borderColor: '#10b981', backgroundColor: grad, borderWidth: 3, fill: true, pointRadius: 0, pointHoverRadius: 6, pointBackgroundColor: '#10b981', tension: 0 }]
       },
       options: { 
         responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-        scales: { y: { position: 'right', grid: { color: gridColor, borderDash: [] }, ticks: { color: tickColor, callback: (value) => window.innerWidth > 768 ? formatIDR(value) : (value/1000000).toFixed(0) + 'Jt' } }, x: { grid: { display: false }, ticks: { display: false } } }, 
+        scales: { y: { position: 'right', grid: { color: 'rgba(122,230,255,0.1)', drawBorder: false }, ticks: { color: '#81b2c6', callback: (value) => window.innerWidth > 768 ? formatIDR(value) : (value/1000000).toFixed(0) + 'Jt' } }, x: { grid: { display: false }, ticks: { display: false } } }, 
         plugins: { legend: { display: false }, tooltip: { backgroundColor: '#001017', titleColor: '#7ae6ff', bodyColor: '#c1ecff', borderColor: '#7ae6ff', borderWidth: 1, callbacks: { label: function(context) { return ` ${formatIDR(context.parsed.y)}`; } } } } 
       }
     });
     return () => { myFinanceChart.destroy(); };
-  }, [transactions, isBusinessEnabled, dlRate, isMobile]);
+  }, [transactions, isBusinessEnabled, dlRate]);
 
   // ================= FETCH & CRUD LOGIC =================
   const fetchTasksData = async (date, pillar) => {
@@ -311,10 +276,18 @@ function App() {
   const handleUpdateTxDate = async (id, newDate) => { if (newDate.trim() !== '') { await supabase.from('growtopia_transactions').update({ date: newDate }).eq('id', id); setEditingTxId(null); fetchTransactions(activePageId); } else { setEditingTxId(null); } };
   const deleteTransaction = async (id) => { if(window.confirm('Hapus transaksi?')) { await supabase.from('growtopia_transactions').delete().eq('id', id); fetchTransactions(activePageId); } };
 
-  const [pillars, setPillars] = useState(() => { try { return JSON.parse(localStorage.getItem('custom_pillars')) || ["Study", "Sport", "Business"]; } catch(e) { return ["Study"]; } });
+  // ================= LOGIKA AUTO-MERGE PILLARS (FIX BUG DATA HILANG) =================
+  const [localPillars, setLocalPillars] = useState(() => { try { return JSON.parse(localStorage.getItem('custom_pillars')) || ["Study", "Sport", "Business"]; } catch(e) { return ["Study"]; } });
+  
+  // Gabungin pillar dari LocalStorage & dari Database Supabase secara otomatis
+  const pillars = Array.from(new Set([
+      ...localPillars,
+      ...(pages||[]).map(p => p.pillar).filter(Boolean)
+  ]));
+
   const [isAddingPillar, setIsAddingPillar] = useState(false); const [newPillarName, setNewPillarName] = useState('');
-  const confirmAddPillar = () => { if (newPillarName.trim() !== '') { const updated = [...(pillars||[]), newPillarName.trim()]; setPillars(updated); localStorage.setItem('custom_pillars', JSON.stringify(updated)); setNewPillarName(''); } setIsAddingPillar(false); };
-  const handleDeletePillar = (pillarToDelete) => { if(window.confirm(`Hapus pillar?`)) { const updated = (pillars||[]).filter(p => p !== pillarToDelete); setPillars(updated); localStorage.setItem('custom_pillars', JSON.stringify(updated)); } };
+  const confirmAddPillar = () => { if (newPillarName.trim() !== '') { const updated = [...(localPillars||[]), newPillarName.trim()]; setLocalPillars(updated); localStorage.setItem('custom_pillars', JSON.stringify(updated)); setNewPillarName(''); } setIsAddingPillar(false); };
+  const handleDeletePillar = (pillarToDelete) => { if(window.confirm(`Hapus pillar ini dari menu? (Pagenya nggak bakal kehapus dari database)`)) { const updated = (localPillars||[]).filter(p => p !== pillarToDelete); setLocalPillars(updated); localStorage.setItem('custom_pillars', JSON.stringify(updated)); } };
 
   const handleUpdateCover = async () => { if (newCoverUrl.trim() !== '' && activePageId) { await supabase.from('pages').update({ cover: newCoverUrl }).eq('id', activePageId); setPages(pages.map(p => p.id === activePageId ? { ...p, cover: newCoverUrl } : p)); } setIsEditingCover(false); setNewCoverUrl(''); };
   const handleUpdateIcon = async () => { if (newIconVal.trim() !== '' && activePageId) { await supabase.from('pages').update({ icon: newIconVal }).eq('id', activePageId); setPages(pages.map(p => p.id === activePageId ? { ...p, icon: newIconVal } : p)); } setIsEditingIcon(false); setNewIconVal(''); };
@@ -322,68 +295,101 @@ function App() {
   const handleAddPage = async (e, pillar) => { if (e.key === 'Enter' && newPageTitle.trim() !== '') { const { data } = await supabase.from('pages').insert([{ title: newPageTitle, pillar: pillar, icon: '📄' }]).select(); setNewPageTitle(''); setAddingPageUnder(null); if (data) { setPages([...pages, data[0]]); setActivePageId(data[0].id); } } };
   const handleDeletePage = async () => { if (activePageId && window.confirm("Hapus page?")) { await supabase.from('pages').delete().eq('id', activePageId); setPages(pages.filter(p => p.id !== activePageId)); setActivePageId(pages[0]?.id || null); } };
 
-  const renderCalendarMobile = () => {
-    const monthStart = startOfMonth(currentMonth); const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); const endDate = endOfWeek(endOfMonth(monthStart), { weekStartsOn: 1 });
-    const rows = []; let days = []; let day = startDate;
-    while (day <= endDate) {
-      for (let i = 0; i < 7; i++) {
-        const cloneDay = day; const dayStr = format(cloneDay, 'yyyy-MM-dd');
-        const tasksForDay = (allPageTasks||[]).filter(t => t.task_date === dayStr);
-        const hasNote = (blocks||[]).some(b => b.type === `daily_note_${dayStr}`);
-        const isAllDone = tasksForDay.length > 0 && tasksForDay.every(t => t.is_completed);
-
-        days.push(
-          <div key={day.toString()} onClick={() => setSelectedDate(cloneDay)} className={`aspect-square p-2 border-r border-b border-[#7ae6ff]/15 text-xs hover:bg-[#dff8ff]/5 transition-colors cursor-pointer relative ${!isSameMonth(day, monthStart) ? "text-[#bdc9cc]/30" : isSameDay(day, selectedDate) ? "bg-[#dff8ff]/20 border-[#dff8ff]/50 text-[#dff8ff] font-bold shadow-[inset_0_0_15px_rgba(122,230,255,0.2)]" : "text-[#bdc9cc]"}`}>
-            {format(day, "d")}
-            <div className="absolute bottom-1 right-1 flex gap-0.5">
-              {hasNote && <div className="w-1.5 h-1.5 rounded-sm bg-[#dff8ff]"></div>}
-              {isAllDone && <div className="w-1.5 h-1.5 rounded-full bg-[#10b981]"></div>}
-              {tasksForDay.length > 0 && !isAllDone && <div className="w-1.5 h-1.5 rounded-full bg-[#ffb4ab]"></div>}
-            </div>
-          </div>
-        );
-        day = addDays(day, 1);
-      }
-      rows.push(<div className="grid grid-cols-7" key={day.toString()}>{days}</div>); days = [];
-    }
-    return <div className="border-t border-l border-[#7ae6ff]/15">{rows}</div>;
-  };
-
-  const renderCalendarDesktop = () => {
-    const monthStart = startOfMonth(currentMonth); const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); const endDate = endOfWeek(endOfMonth(monthStart), { weekStartsOn: 1 });
-    const rows = []; let days = []; let day = startDate;
-    while (day <= endDate) {
-      for (let i = 0; i < 7; i++) {
-        const cloneDay = day; const dayStr = format(cloneDay, 'yyyy-MM-dd');
-        const tasksForDay = (allPageTasks||[]).filter(t => t.task_date === dayStr);
-        const hasNote = (blocks||[]).some(b => b.type === `daily_note_${dayStr}`);
-        const isAllDone = tasksForDay.length > 0 && tasksForDay.every(t => t.is_completed);
-
-        days.push(
-          <div key={day.toString()} onClick={() => setSelectedDate(cloneDay)} className={`p-2 border border-[#7ae6ff]/10 min-h-[80px] cursor-pointer transition-colors relative ${ !isSameMonth(day, monthStart) ? "text-[#3d494c] bg-[#001017]/50" : isSameDay(day, selectedDate) ? "bg-[#7ae6ff]/15 text-[#dff8ff] border border-[#7ae6ff]/40 shadow-[inset_0_0_15px_rgba(122,230,255,0.1)]" : "text-[#bdc9cc] hover:bg-[#7ae6ff]/5 bg-[#001a2e]/30" }`}>
-            <span className={`text-xs font-medium ${isSameDay(day, new Date()) ? 'bg-[#7ae6ff] text-[#001017] px-1.5 py-0.5 rounded' : ''}`}>{format(day, "d")}</span>
-            <div className="absolute bottom-2 right-2 flex gap-1 items-center">
-                {hasNote && <div className="w-1.5 h-1.5 rounded-sm bg-[#7ae6ff]"></div>}
-                {isAllDone && <div className="w-2 h-2 rounded-full bg-[#10b981]"></div>}
-                {tasksForDay.length > 0 && !isAllDone && <div className="w-2 h-2 rounded-full bg-[#ffb4ab]"></div>}
-            </div>
-          </div>
-        );
-        day = addDays(day, 1);
-      }
-      rows.push(<div className="grid grid-cols-7 gap-px" key={day.toString()}>{days}</div>); days = [];
-    }
-    return <div className="bg-[#7ae6ff]/5 border border-[#7ae6ff]/15 rounded-lg overflow-hidden">{rows}</div>;
-  };
-
   if (loading) return <div className="min-h-screen bg-[#000b14] flex items-center justify-center text-[#7ae6ff] font-sans">System Booting...</div>;
 
   const defaultCover = "https://media3.giphy.com/media/LUIvcbR6yytz2/giphy.gif";
   const defaultIcon = "https://media1.giphy.com/media/VbKLoZ51gBqA0n2K03/giphy.gif";
   const isEmblemUrl = activePage?.icon?.startsWith('http') || activePage?.icon?.startsWith('data:image');
+  const monthlyTodos = (blocks || []).filter(b => b.type === `monthly_todo_${monthKey}`);
+  const monthlyNotes = (blocks || []).filter(b => b.type === `monthly_note_${monthKey}`);
+
+  const renderCalendarMobile = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    
+    const rows = [];
+    let days = [];
+    let day = startDate;
+
+    while (day <= endDate) {
+      for (let i = 0; i < 7; i++) {
+        const formattedDate = format(day, 'd');
+        const cloneDay = day;
+        const isCurrentMonth = isSameMonth(day, monthStart);
+        const isSelectedDay = isSameDay(day, selectedDate);
+        const isToday = isSameDay(day, new Date());
+        const dayTasks = (allPageTasks || []).filter(t => t.task_date === format(cloneDay, 'yyyy-MM-dd'));
+        const allDone = dayTasks.length > 0 && dayTasks.every(t => t.is_completed);
+        const hasTasks = dayTasks.length > 0;
+        
+        days.push(
+          <div
+            key={day}
+            onClick={() => setSelectedDate(cloneDay)}
+            className={`p-2 border-r border-b border-[#7ae6ff]/15 flex flex-col items-center justify-center cursor-pointer transition-colors ${!isCurrentMonth ? 'text-[#3d494c] bg-[#000b14]/30' : isSelectedDay ? 'bg-[#dff8ff] text-[#00363f] font-bold shadow-[0_0_15px_rgba(122,230,255,0.4)]' : isToday ? 'bg-[#7ae6ff]/20 text-[#7ae6ff] font-bold' : 'text-[#b9eaff] hover:bg-[#7ae6ff]/10'}`}
+          >
+            <span className="text-xs">{formattedDate}</span>
+            <div className="flex gap-0.5 mt-1">
+               {hasTasks && <div className={`w-1 h-1 rounded-full ${allDone ? 'bg-[#10b981]' : 'bg-[#ffb4ab]'}`}></div>}
+            </div>
+          </div>
+        );
+        day = addDays(day, 1);
+      }
+      rows.push(<div className="grid grid-cols-7 border-l border-[#7ae6ff]/15" key={day}>{days}</div>);
+      days = [];
+    }
+    return <div>{rows}</div>;
+  };
+
+  const renderCalendarDesktop = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    
+    const rows = [];
+    let days = [];
+    let day = startDate;
+
+    while (day <= endDate) {
+      for (let i = 0; i < 7; i++) {
+        const formattedDate = format(day, 'd');
+        const cloneDay = day;
+        const isCurrentMonth = isSameMonth(day, monthStart);
+        const isSelectedDay = isSameDay(day, selectedDate);
+        const isToday = isSameDay(day, new Date());
+        const dayTasks = (allPageTasks || []).filter(t => t.task_date === format(cloneDay, 'yyyy-MM-dd'));
+        
+        days.push(
+          <div
+            key={day}
+            onClick={() => setSelectedDate(cloneDay)}
+            className={`min-h-[80px] p-2 border-r border-b border-[#7ae6ff]/15 flex flex-col items-start cursor-pointer transition-all duration-300 ${!isCurrentMonth ? 'text-[#3d494c] bg-[#001017]/30' : isSelectedDay ? 'bg-[#7ae6ff]/10 border-[#7ae6ff]' : isToday ? 'bg-[#10b981]/10 border-[#10b981]' : 'text-[#b9eaff] hover:bg-[#7ae6ff]/5'}`}
+          >
+            <span className={`text-sm font-bold ${!isCurrentMonth ? '' : isSelectedDay ? 'text-[#7ae6ff]' : isToday ? 'text-[#10b981]' : 'text-[#c1ecff]'}`}>{formattedDate}</span>
+            <div className="flex flex-col gap-1 mt-2 w-full">
+               {dayTasks.slice(0, 2).map((t, idx) => (
+                  <div key={idx} className={`text-[9px] truncate px-1 rounded ${t.is_completed ? 'bg-[#10b981]/20 text-[#10b981] line-through' : 'bg-[#7ae6ff]/20 text-[#7ae6ff]'}`}>
+                     {t.task_name}
+                  </div>
+               ))}
+               {dayTasks.length > 2 && <span className="text-[8px] text-[#bdc9cc]">+{dayTasks.length - 2} more</span>}
+            </div>
+          </div>
+        );
+        day = addDays(day, 1);
+      }
+      rows.push(<div className="grid grid-cols-7 border-l border-[#7ae6ff]/15" key={day}>{days}</div>);
+      days = [];
+    }
+    return <div>{rows}</div>;
+  };
 
   // =========================================================================
-  // VIEW: MOBILE CYBERPUNK (Desain Baru)
+  // VIEW: MOBILE CYBERPUNK (KODE ASLI DARI USER, TIDAK DIUBAH)
   // =========================================================================
   if (isMobile) {
     return (
@@ -429,7 +435,7 @@ function App() {
                   </div>
                   <div className="space-y-1">
                     {(pages||[]).filter(p => p.pillar === pillar).map(page => (
-                      <button key={page.id} onClick={() => {setActivePageId(page.id); setIsSidebarOpen(false);}} className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-300 rounded-lg group ${activePageId === page.id ? 'bg-[#dff8ff]/20 text-[#dff8ff] border-l-4 border-[#dff8ff]' : 'text-[#bdc9cc] hover:bg-[#dff8ff]/10 hover:text-[#dff8ff]'}`}>
+                      <button key={page.id} onClick={() => {setActivePageId(page.id); setIsSidebarOpen(false);}} className={`w-full text-left nav-item px-4 py-3 flex items-center gap-3 transition-all duration-300 rounded-lg group ${activePageId === page.id ? 'bg-[#dff8ff]/20 text-[#dff8ff] border-l-4 border-[#dff8ff]' : 'text-[#bdc9cc] hover:bg-[#dff8ff]/10 hover:text-[#dff8ff]'}`}>
                         {page.icon?.startsWith('http') || page.icon?.startsWith('data:image') ? (
                           <img src={page.icon} alt="icon" onError={(e) => { e.target.onerror = null; e.target.src=defaultIcon; }} className="w-5 h-5 rounded-sm object-cover" />
                         ) : (
@@ -671,7 +677,7 @@ function App() {
                                 <button onClick={() => deleteBlock(task.id)} className="text-[#ffb4ab]/50"><span className="material-symbols-outlined text-[12px]">delete</span></button>
                             </div>
                         ))}
-                        <input type="text" value={newMonthlyTodo} onChange={(e) => setNewMonthlyTodo(e.target.value)} onKeyDown={(e) => handleAddCustomBlockEnter(e, `monthly_todo_${monthKey}`, newMonthlyTodo, setNewMonthlyTodo)} className="w-full bg-transparent border-b border-[#7ae6ff]/30 text-xs p-1 text-[#b9eaff] outline-none" placeholder="+ Tambah target bulan ini..." />
+                        <input type="text" value={newMonthlyTodo} onChange={(e) => setNewMonthlyTodo(e.target.value)} onKeyDown={(e) => handleAddCustomBlockEnter(e, `monthly_todo_${monthKey}`, newMonthlyTodo, setNewMonthlyTodo)} className="w-full bg-transparent border-0 border-b border-[#3d494c] focus:border-[#00c8f9] text-sm p-1 text-[#b9eaff] outline-none" placeholder="+ Tambah target bulan ini..." />
                      </div>
                      <div className="pt-3 border-t border-[#7ae6ff]/15">
                         <h4 className="text-[10px] font-bold text-[#bdc9cc] mb-2">Catatan Bulan Ini</h4>
@@ -698,7 +704,7 @@ function App() {
                              <button onClick={() => deleteDailyTask(task.id)} className="text-[#ffb4ab]/50"><span className="material-symbols-outlined text-[12px]">delete</span></button>
                            </div>
                         ))}
-                        <input type="text" value={newDailyTaskName} onChange={(e) => setNewDailyTaskName(e.target.value)} onKeyDown={handleAddDailyTask} className="w-full bg-transparent border-b border-[#7ae6ff]/30 text-xs p-1 text-[#b9eaff] outline-none" placeholder="+ Tambah jadwal harian..." />
+                        <input type="text" value={newDailyTaskName} onChange={(e) => setNewDailyTaskName(e.target.value)} onKeyDown={handleAddDailyTask} className="w-full bg-transparent border-0 border-b border-[#7ae6ff]/30 text-xs p-1 text-[#b9eaff] outline-none" placeholder="+ Tambah jadwal harian..." />
                         <div className="pt-4 mt-3 border-t border-[#7ae6ff]/15">
                           <div className="flex items-center gap-2 text-[10px] font-bold text-[#bdc9cc] mb-2"><span className="material-symbols-outlined text-[12px] text-[#dff8ff]">description</span> Detail Quest Harian</div>
                           {dailyNoteBlocks.map(note => (
@@ -786,7 +792,7 @@ function App() {
                    </div>
                    {isAddingNote && (
                       <div className="glass-panel p-3 rounded-xl animate-entrance">
-                          <textarea autoFocus value={newNoteContent} onChange={(e) => setNewNoteContent(e.target.value)} className="w-full bg-[#000b14] border border-[#7ae6ff]/40 rounded-xl p-3 text-xs text-[#b9eaff] resize-none h-24 outline-none custom-scrollbar" placeholder="Tulis catatan..."></textarea>
+                          <textarea autoFocus value={newNoteContent} onChange={(e) => setNewNoteContent(e.target.value)} className="w-full bg-[#000b14] border border-[#3d494c] focus:border-[#7ae6ff] rounded-xl p-3 text-xs text-[#b9eaff] resize-none h-24 outline-none custom-scrollbar" placeholder="Tulis catatan..."></textarea>
                           <button onClick={handleAddNote} className="bg-[#dff8ff] text-[#00363f] px-3 py-1.5 rounded-lg text-xs font-bold mt-2 w-full">Simpan</button>
                       </div>
                    )}
@@ -866,7 +872,7 @@ function App() {
                       {page.icon?.startsWith('http') || page.icon?.startsWith('data:image') ? (
                         <img src={page.icon} onError={(e) => { e.target.onerror = null; e.target.src=defaultIcon; }} alt="icon" className="w-5 h-5 rounded-sm object-cover" />
                       ) : (
-                        <span className="text-sm">{page.icon || '\uD83D\uDCC4'}</span>
+                        <span className="text-sm">{page.icon || '📄'}</span>
                       )}
                       <span className="truncate text-sm">{page.title}</span>
                     </button>
@@ -900,21 +906,21 @@ function App() {
         <div className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none bg-[#001017]"></div>
 
         {/* TOP HEADER BAR */}
-        <header className="sticky top-0 z-40 w-full bg-[#001017]/60 backdrop-blur-md border-b border-[#7ae6ff]/15 h-12 px-8 flex justify-between items-center transition-all duration-300">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#7ae6ff] text-[18px]">grid_view</span>
-            <h2 className="text-[15px] font-archivo font-bold text-[#7ae6ff] tracking-tight">Personal Command Center</h2>
-          </div>
+        <header className="sticky top-0 z-40 w-full bg-[#001017]/60 backdrop-blur-md border-b border-[#7ae6ff]/15 h-20 px-8 flex justify-between items-center transition-all duration-300">
           <div className="flex items-center gap-4">
-            <button onClick={handleSyncData} disabled={isSyncing} className="bg-[#00232e] px-3 py-1 rounded-md border border-[#7ae6ff]/15 text-[10px] font-anybody tracking-widest hover:bg-[#00313e] hover:border-[#7ae6ff]/50 transition-all duration-300 flex items-center gap-1.5 text-[#c1ecff]">
-              <span className={`material-symbols-outlined text-[13px] ${isSyncing ? 'animate-spin' : ''}`}>sync</span> {isSyncing ? 'Syncing...' : 'Sync Data'}
+            <span className="material-symbols-outlined text-[#7ae6ff] text-2xl">grid_view</span>
+            <h2 className="text-[24px] font-archivo font-bold text-[#7ae6ff] tracking-tight">Personal Command Center</h2>
+          </div>
+          <div className="flex items-center gap-6">
+            <button onClick={handleSyncData} disabled={isSyncing} className="bg-[#00232e] px-4 py-2 rounded-lg border border-[#7ae6ff]/15 text-[11px] font-anybody tracking-widest hover:bg-[#00313e] hover:border-[#7ae6ff]/50 transition-all duration-300 flex items-center gap-2 text-[#c1ecff]">
+              <span className={`material-symbols-outlined text-sm ${isSyncing ? 'animate-spin' : ''}`}>sync</span> {isSyncing ? 'Syncing...' : 'Sync Data'}
             </button>
           </div>
         </header>
 
         <div className="p-8 max-w-7xl mx-auto w-full space-y-12">
           {/* HERO BANNER */}
-          <section className="relative rounded-2xl overflow-hidden h-[350px] border border-[#7ae6ff]/15 animate-entrance stagger-1 group">
+          <section className="relative rounded-2xl overflow-hidden h-[300px] border border-[#7ae6ff]/15 animate-entrance stagger-1 group">
              {isEditingCover && (
                <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#000b14]/80 backdrop-blur-sm px-4">
                  <div className="glass-panel p-4 rounded-xl flex gap-3 w-full max-w-lg">
@@ -937,8 +943,8 @@ function App() {
                    </div>
                  )}
                  
-                 <div onClick={() => { setIsEditingIcon(true); setNewIconVal(activePage?.icon || '\u{1F4C4}'); }} className="w-24 h-24 shrink-0 glass-panel rounded-2xl flex items-center justify-center border-2 border-[#7ae6ff]/30 text-5xl transform transition hover:scale-110 duration-300 cursor-pointer overflow-hidden relative group/emblem">
-                   {isEmblemUrl ? <img src={activePage.icon} onError={(e) => { e.target.onerror = null; e.target.src=defaultIcon; }} alt="icon" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} /> : <span>{activePage?.icon || '\u{1F4C4}'}</span>}
+                 <div onClick={() => { setIsEditingIcon(true); setNewIconVal(activePage?.icon || '📄'); }} className="w-24 h-24 shrink-0 glass-panel rounded-2xl flex items-center justify-center border-2 border-[#7ae6ff]/30 text-5xl transform transition hover:scale-110 duration-300 cursor-pointer overflow-hidden relative group/emblem">
+                   {isEmblemUrl ? <img src={activePage.icon} onError={(e) => { e.target.onerror = null; e.target.src=defaultIcon; }} alt="icon" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} /> : <span>{activePage?.icon || '📄'}</span>}
                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/emblem:opacity-100 transition-opacity bg-[#000b14]/40 backdrop-blur-sm"><span className="material-symbols-outlined text-[#dff8ff] text-2xl">edit</span></div>
                  </div>
                </div>
@@ -978,34 +984,28 @@ function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="glass-panel finance-card-pulse p-6 rounded-xl relative overflow-hidden group">
-                  <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-[0.08] transform group-hover:scale-110 transition-all duration-500 pointer-events-none">
-                    <span className="material-symbols-outlined text-[#10b981]" style={{ fontSize: '160px' }}>account_balance</span>
-                  </div>
-                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2">Total Net Worth</p>
-                  <p className={`text-[32px] font-bold font-archivo tracking-tight ${totalKekayaanIDR >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{formatIDR(totalKekayaanIDR)}</p>
-                  <div className="mt-4 flex items-center gap-2 text-[#10b981]"><span className="material-symbols-outlined text-sm animate-pulse">trending_up</span><span className="text-sm">Active & Growing</span></div>
+                  <div className="absolute -bottom-4 -right-4 opacity-10 transform group-hover:scale-110 transition-all duration-500 pointer-events-none"><span className="material-symbols-outlined text-[#10b981]" style={{ fontSize: '160px', lineHeight: 1 }}>account_balance</span></div>
+                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2 relative z-10">Total Net Worth (Gabungan)</p>
+                  <p className={`text-[32px] font-bold font-archivo tracking-tight relative z-10 ${totalKekayaanIDR >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{formatIDR(totalKekayaanIDR)}</p>
+                  <div className="mt-4 flex items-center gap-2 text-[#10b981] relative z-10"><span className="material-symbols-outlined text-sm animate-pulse">trending_up</span><span className="text-sm">Stable Today</span></div>
                 </div>
                 
                 <div className="glass-panel finance-card-pulse p-6 rounded-xl relative overflow-hidden group">
-                  <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-[0.08] transform group-hover:scale-110 transition-all duration-500 pointer-events-none">
-                    <span className="material-symbols-outlined text-[#b9eaff]" style={{ fontSize: '160px' }}>wallet</span>
-                  </div>
-                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2">Dompet Tabungan</p>
-                  <p className={`text-[32px] font-bold font-archivo tracking-tight ${tabunganBalance >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{formatIDR(tabunganBalance)}</p>
-                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-[#7ae6ff]/15 pt-4">
+                  <div className="absolute -bottom-4 -right-4 opacity-10 transform group-hover:scale-110 transition-all duration-500 pointer-events-none"><span className="material-symbols-outlined text-[#b9eaff]" style={{ fontSize: '160px', lineHeight: 1 }}>credit_card</span></div>
+                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2 relative z-10">Dompet Tabungan</p>
+                  <p className={`text-[32px] font-bold font-archivo tracking-tight relative z-10 ${tabunganBalance >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{formatIDR(tabunganBalance)}</p>
+                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-[#7ae6ff]/15 pt-4 relative z-10">
                     <div><p className="text-[10px] text-[#bdc9cc] uppercase">Keluar</p><p className="text-[#ffb4ab] font-anybody font-bold text-sm">{formatIDR(tabunganOut)}</p></div>
                     <div className="text-right"><p className="text-[10px] text-[#bdc9cc] uppercase">Masuk</p><p className="text-[#10b981] font-anybody font-bold text-sm">{formatIDR(tabunganIn)}</p></div>
                   </div>
                 </div>
 
                 <div className="glass-panel finance-card-pulse p-6 rounded-xl relative overflow-hidden group border-r-4 border-[#10b981]/30">
-                  <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-[0.08] transform group-hover:scale-110 transition-all duration-500 pointer-events-none">
-                    <span className="material-symbols-outlined text-[#b9eaff]" style={{ fontSize: '160px' }}>sports_esports</span>
-                  </div>
-                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2">Profit Growtopia</p>
-                  <p className={`text-[32px] font-bold font-archivo tracking-tight ${isGtProfit ? 'text-[#00c8f9]' : 'text-[#ffb4ab]'}`}>{isGtProfit ? '+' : ''}{gtNetDL.toFixed(2)} DL</p>
-                  <p className="text-sm text-[#bdc9cc] mt-1">≈ {formatIDR(gtNetIDR)}</p>
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-[10px] uppercase text-[#bdc9cc]">
+                  <div className="absolute -bottom-4 -right-4 opacity-10 transform group-hover:scale-110 transition-all duration-500 pointer-events-none"><span className="material-symbols-outlined text-[#b9eaff]" style={{ fontSize: '160px', lineHeight: 1 }}>sports_esports</span></div>
+                  <p className="text-[11px] font-anybody uppercase tracking-[0.1em] text-[#bdc9cc] mb-2 relative z-10">Profit Growtopia (Aset)</p>
+                  <p className={`text-[32px] font-bold font-archivo tracking-tight relative z-10 ${isGtProfit ? 'text-[#00c8f9]' : 'text-[#ffb4ab]'}`}>{isGtProfit ? '+' : ''}{gtNetDL.toFixed(2)} DL</p>
+                  <p className="text-sm text-[#bdc9cc] mt-1 relative z-10">≈ {formatIDR(gtNetIDR)}</p>
+                  <div className="mt-4 grid grid-cols-2 gap-4 text-[10px] uppercase text-[#bdc9cc] relative z-10">
                     <span>Modal: <span className="text-[#ffb4ab]">{gtModalDL.toFixed(2)} DL</span></span>
                     <span className="text-right">Omset: <span className="text-[#10b981]">{gtOmsetDL.toFixed(2)} DL</span></span>
                   </div>
@@ -1035,7 +1035,7 @@ function App() {
 
                  {isTransferring && (
                     <div className="p-4 mb-6 bg-[#001f29] border border-[#10b981]/50 rounded-xl flex gap-4 items-end animate-entrance">
-                       <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Aksi</label><select value={transferDirection} onChange={(e) => setTransferDirection(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#10b981]"><option value="TABUNGAN_TO_GT">Beli Aset (Rp âž¡ï¸  DL)</option><option value="GT_TO_TABUNGAN">Jual Aset (DL âž¡ï¸  Rp)</option></select></div>
+                       <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Aksi</label><select value={transferDirection} onChange={(e) => setTransferDirection(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#10b981]"><option value="TABUNGAN_TO_GT">Beli Aset (Rp ➡️ DL)</option><option value="GT_TO_TABUNGAN">Jual Aset (DL ➡️ Rp)</option></select></div>
                        <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Tanggal</label><input type="date" value={transferDate} onChange={(e) => setTransferDate(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#10b981]" /></div>
                        <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Nominal Rp</label><input type="number" value={transferAmountIDR} onChange={(e) => setTransferAmountIDR(e.target.value)} placeholder="0" className="w-32 bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#10b981]" /></div>
                        <div className="flex-1"><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Keterangan</label><input type="text" value={transferDesc} onChange={(e) => setTransferDesc(e.target.value)} placeholder="Tulis keterangan..." className="w-full bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#10b981]" /></div>
@@ -1065,7 +1065,7 @@ function App() {
                             <div>
                                 <p className="text-[#c1ecff] text-[15px] font-semibold">{t.description}</p>
                                 <div className="flex items-center gap-3 mt-1.5">
-                                    {editingTxId === t.id ? ( <input type="date" autoFocus value={editTxDate} onChange={(e) => setEditTxDate(e.target.value)} onBlur={() => handleUpdateTxDate(t.id, editTxDate)} onKeyDown={(e) => e.key === 'Enter' && handleUpdateTxDate(t.id, editTxDate)} className="text-[11px] bg-[#000b14] border border-[#7ae6ff] text-[#dff8ff] px-2 py-0.5 rounded outline-none" /> ) : ( <span onClick={() => { setEditingTxId(t.id); setEditTxDate(t.date); }} className="text-[11px] font-anybody text-[#879396] cursor-pointer hover:text-[#7ae6ff] transition-colors">{t.date} âœŽ</span> )}
+                                    {editingTxId === t.id ? ( <input type="date" autoFocus value={editTxDate} onChange={(e) => setEditTxDate(e.target.value)} onBlur={() => handleUpdateTxDate(t.id, editTxDate)} onKeyDown={(e) => e.key === 'Enter' && handleUpdateTxDate(t.id, editTxDate)} className="text-[11px] bg-[#000b14] border border-[#7ae6ff] text-[#dff8ff] px-2 py-0.5 rounded outline-none" /> ) : ( <span onClick={() => { setEditingTxId(t.id); setEditTxDate(t.date); }} className="text-[11px] font-anybody text-[#879396] cursor-pointer hover:text-[#7ae6ff] transition-colors">{t.date} ✎</span> )}
                                     <span className={`text-[10px] font-bold font-anybody px-2 py-0.5 rounded uppercase ${isTabungan ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-[#00c8f9]/10 text-[#00c8f9]'}`}>{isTabungan ? 'Bank' : 'Growtopia'}</span>
                                 </div>
                             </div>
@@ -1073,7 +1073,7 @@ function App() {
                         <div className="flex items-center gap-6">
                           <div className="text-right">
                               <span className={`font-data-mono text-[18px] font-bold ${isMasuk ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{isMasuk ? '+' : '-'}{isTabungan ? formatIDR(t.amount) : `${t.amount} ${t.currency_type}`}</span>
-                              {!isTabungan && <p className="text-[11px] text-[#879396] mt-1 font-anybody">â‰ˆ {formatIDR((t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount)) * dlRate)}</p>}
+                              {!isTabungan && <p className="text-[11px] text-[#879396] mt-1 font-anybody">≈ {formatIDR((t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount)) * dlRate)}</p>}
                           </div>
                           <button onClick={() => deleteTransaction(t.id)} className="text-[#ffb4ab]/60 opacity-0 group-hover:opacity-100 hover:text-[#ffb4ab] p-2 hover:bg-[#ffb4ab]/10 rounded-lg transition-all"><span className="material-symbols-outlined text-[18px]">delete</span></button>
                         </div>
