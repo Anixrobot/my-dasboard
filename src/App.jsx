@@ -143,21 +143,24 @@ function App() {
     fetchBlocks(activePageId);
   };
 
-  let tabunganIn = 0; let tabunganOut = 0; let gtModalDL = 0; let gtOmsetDL = 0;
-  (transactions || []).forEach(t => {
-    if (t.currency_type === 'TABUNGAN' || t.currency_type === 'IDR') {
-      if (t.type === 'pemasukan') tabunganIn += t.amount; else tabunganOut += t.amount;
-    } else if (['WL', 'DL', 'BGL'].includes(t.currency_type)) {
-      const valDL = t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount);
-      if (t.type === 'pemasukan') gtOmsetDL += valDL; else gtModalDL += valDL;
-    }
-  });
-
-  const tabunganBalance = tabunganIn - tabunganOut;
-  const gtNetDL = gtOmsetDL - gtModalDL;
-  const isGtProfit = gtNetDL >= 0;
-  const gtNetIDR = gtNetDL * dlRate;
-  const totalKekayaanIDR = tabunganBalance + gtNetIDR;
+  const financeData = useMemo(() => {
+    let tabunganIn = 0; let tabunganOut = 0; let gtModalDL = 0; let gtOmsetDL = 0;
+    (transactions || []).forEach(t => {
+      if (t.currency_type === 'TABUNGAN' || t.currency_type === 'IDR') {
+        if (t.type === 'pemasukan') tabunganIn += t.amount; else tabunganOut += t.amount;
+      } else if (['WL', 'DL', 'BGL'].includes(t.currency_type)) {
+        const valDL = t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount);
+        if (t.type === 'pemasukan') gtOmsetDL += valDL; else gtModalDL += valDL;
+      }
+    });
+    const tabunganBalance = tabunganIn - tabunganOut;
+    const gtNetDL = gtOmsetDL - gtModalDL;
+    const isGtProfit = gtNetDL >= 0;
+    const gtNetIDR = gtNetDL * dlRate;
+    const totalKekayaanIDR = tabunganBalance + gtNetIDR;
+    return { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR };
+  }, [transactions, dlRate]);
+  const { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR } = financeData;
   const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
   // ================= 2. PLANNER LOGIC =================
@@ -180,14 +183,17 @@ function App() {
   const currentDateStr = format(selectedDate, 'yyyy-MM-dd');
   const dailyNoteBlocks = (blocks || []).filter(b => b.type === `daily_note_${currentDateStr}`);
 
-  const calcPercent = (tasksArray) => (!tasksArray || tasksArray.length === 0) ? 0 : Math.round((tasksArray.filter(t => t.is_completed).length / tasksArray.length) * 100);
-  const tasksToday = (allPageTasks || []).filter(t => t.task_date === format(new Date(), 'yyyy-MM-dd'));
-  const tasksWeek = (allPageTasks || []).filter(t => new Date(t.task_date) >= startOfWeek(new Date(), { weekStartsOn: 1 }) && new Date(t.task_date) <= endOfWeek(new Date(), { weekStartsOn: 1 }));
-  const tasksYear = (allPageTasks || []).filter(t => getYear(new Date(t.task_date)) === getYear(new Date()));
-
-  const dailyPercent = calcPercent(tasksToday);
-  const weeklyPercent = calcPercent(tasksWeek);
-  const yearlyPercent = calcPercent(tasksYear);
+  const calcPercent = useCallback((tasksArray) => (!tasksArray || tasksArray.length === 0) ? 0 : Math.round((tasksArray.filter(t => t.is_completed).length / tasksArray.length) * 100), []);
+  
+  const { tasksToday, tasksWeek, tasksYear, dailyPercent, weeklyPercent, yearlyPercent } = useMemo(() => {
+    const today = (allPageTasks || []).filter(t => t.task_date === format(new Date(), 'yyyy-MM-dd'));
+    const week = (allPageTasks || []).filter(t => new Date(t.task_date) >= startOfWeek(new Date(), { weekStartsOn: 1 }) && new Date(t.task_date) <= endOfWeek(new Date(), { weekStartsOn: 1 }));
+    const year = (allPageTasks || []).filter(t => getYear(new Date(t.task_date)) === getYear(new Date()));
+    return {
+      tasksToday: today, tasksWeek: week, tasksYear: year,
+      dailyPercent: calcPercent(today), weeklyPercent: calcPercent(week), yearlyPercent: calcPercent(year)
+    };
+  }, [allPageTasks, calcPercent]);
 
   const [statsView, setStatsView] = useState('mingguan');
   const chartRef = useRef(null);
@@ -335,44 +341,46 @@ function App() {
   const monthlyNotes = (blocks || []).filter(b => b.type === `monthly_note_${monthKey}`);
 
   const renderCalendarMobile = () => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
-    
-    const rows = [];
-    let days = [];
-    let day = startDate;
+    return useMemo(() => {
+      const monthStart = startOfMonth(currentMonth);
+      const monthEnd = endOfMonth(monthStart);
+      const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+      const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+      
+      const rows = [];
+      let days = [];
+      let day = startDate;
 
-    while (day <= endDate) {
-      for (let i = 0; i < 7; i++) {
-        const formattedDate = format(day, 'd');
-        const cloneDay = day;
-        const isCurrentMonth = isSameMonth(day, monthStart);
-        const isSelectedDay = isSameDay(day, selectedDate);
-        const isToday = isSameDay(day, new Date());
-        const dayTasks = (allPageTasks || []).filter(t => t.task_date === format(cloneDay, 'yyyy-MM-dd'));
-        const allDone = dayTasks.length > 0 && dayTasks.every(t => t.is_completed);
-        const hasTasks = dayTasks.length > 0;
-        
-        days.push(
-          <div
-            key={day}
-            onClick={() => setSelectedDate(cloneDay)}
-            className={`p-2 border-r border-b border-[#7ae6ff]/15 flex flex-col items-center justify-center cursor-pointer transition-colors ${!isCurrentMonth ? 'text-[#3d494c] bg-[#000b14]/30' : isSelectedDay ? 'bg-[#dff8ff] text-[#00363f] font-bold shadow-[0_0_15px_rgba(122,230,255,0.4)]' : isToday ? 'bg-[#7ae6ff]/20 text-[#7ae6ff] font-bold' : 'text-[#b9eaff] hover:bg-[#7ae6ff]/10'}`}
-          >
-            <span className="text-xs">{formattedDate}</span>
-            <div className="flex gap-0.5 mt-1">
-               {hasTasks && <div className={`w-1 h-1 rounded-full ${allDone ? 'bg-[#10b981]' : 'bg-[#ffb4ab]'}`}></div>}
+      while (day <= endDate) {
+        for (let i = 0; i < 7; i++) {
+          const formattedDate = format(day, 'd');
+          const cloneDay = day;
+          const isCurrentMonth = isSameMonth(day, monthStart);
+          const isSelectedDay = isSameDay(day, selectedDate);
+          const isToday = isSameDay(day, new Date());
+          const dayTasks = (allPageTasks || []).filter(t => t.task_date === format(cloneDay, 'yyyy-MM-dd'));
+          const allDone = dayTasks.length > 0 && dayTasks.every(t => t.is_completed);
+          const hasTasks = dayTasks.length > 0;
+          
+          days.push(
+            <div
+              key={day}
+              onClick={() => setSelectedDate(cloneDay)}
+              className={`p-2 border-r border-b border-[#7ae6ff]/15 flex flex-col items-center justify-center cursor-pointer transition-colors ${!isCurrentMonth ? 'text-[#3d494c] bg-[#000b14]/30' : isSelectedDay ? 'bg-[#dff8ff] text-[#00363f] font-bold shadow-[0_0_15px_rgba(122,230,255,0.4)]' : isToday ? 'bg-[#7ae6ff]/20 text-[#7ae6ff] font-bold' : 'text-[#b9eaff] hover:bg-[#7ae6ff]/10'}`}
+            >
+              <span className="text-xs">{formattedDate}</span>
+              <div className="flex gap-0.5 mt-1">
+                 {hasTasks && <div className={`w-1 h-1 rounded-full ${allDone ? 'bg-[#10b981]' : 'bg-[#ffb4ab]'}`}></div>}
+              </div>
             </div>
-          </div>
-        );
-        day = addDays(day, 1);
+          );
+          day = addDays(day, 1);
+        }
+        rows.push(<div className="grid grid-cols-7 border-l border-[#7ae6ff]/15" key={day}>{days}</div>);
+        days = [];
       }
-      rows.push(<div className="grid grid-cols-7 border-l border-[#7ae6ff]/15" key={day}>{days}</div>);
-      days = [];
-    }
-    return <div>{rows}</div>;
+      return <div>{rows}</div>;
+    }, [currentMonth, selectedDate, allPageTasks]);
   };
 
   const renderCalendarDesktop = () => {
@@ -427,10 +435,10 @@ function App() {
       <>
         <style>{`
           body { background-color: #000b14; color: #b9eaff; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
-          .glass-panel { backdrop-filter: blur(12px); background: rgba(0, 26, 46, 0.6); border: 1px solid rgba(122, 230, 255, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
+          .glass-panel { backdrop-filter: blur(8px); background: rgba(0, 26, 46, 0.7); border: 1px solid rgba(122, 230, 255, 0.15); }
           .finance-card { border-left: 4px solid #10b981; }
           .pulse-border { animation: pulse-emerald 3s infinite ease-in-out; }
-          @keyframes pulse-emerald { 0%, 100% { border-color: rgba(16, 185, 129, 0.15); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); } 50% { border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); } }
+          @keyframes pulse-emerald { 0%, 100% { border-color: rgba(16, 185, 129, 0.15); } 50% { border-color: rgba(16, 185, 129, 0.6); } }
           .font-archivo { font-family: 'Archivo Narrow', sans-serif; }
           .font-anybody { font-family: 'Anybody', sans-serif; }
           .font-atkinson { font-family: 'Atkinson Hyperlegible Next', sans-serif; }
