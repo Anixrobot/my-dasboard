@@ -112,6 +112,37 @@ function App() {
   const [dlRate, setDlRate] = useState(() => localStorage.getItem('finance_dl_rate') || 10000);
   useEffect(() => localStorage.setItem('finance_dl_rate', dlRate), [dlRate]);
 
+  useEffect(() => {
+    const rateBlock = (blocks || []).find(b => b.type === 'setting_dlRate');
+    if (rateBlock && rateBlock.content) setDlRate(rateBlock.content);
+    const subBlock = (blocks || []).find(b => b.type === 'setting_subtitles');
+    if (subBlock && subBlock.content) {
+      try { setSubtitles(JSON.parse(subBlock.content)); } catch(e) {}
+    }
+  }, [blocks]);
+
+  const saveDlRateToDB = async (newRate) => {
+    if (!activePageId) return;
+    const existing = (blocks || []).find(b => b.type === 'setting_dlRate');
+    if (existing) {
+        await supabase.from('blocks').update({ content: newRate.toString() }).eq('id', existing.id);
+    } else {
+        await supabase.from('blocks').insert([{ page_id: activePageId, type: 'setting_dlRate', content: newRate.toString(), is_completed: false }]);
+    }
+    fetchBlocks(activePageId);
+  };
+
+  const saveSubtitlesToDB = async (newSubs) => {
+    if (!activePageId) return;
+    const existing = (blocks || []).find(b => b.type === 'setting_subtitles');
+    if (existing) {
+        await supabase.from('blocks').update({ content: JSON.stringify(newSubs) }).eq('id', existing.id);
+    } else {
+        await supabase.from('blocks').insert([{ page_id: activePageId, type: 'setting_subtitles', content: JSON.stringify(newSubs), is_completed: false }]);
+    }
+    fetchBlocks(activePageId);
+  };
+
   let tabunganIn = 0; let tabunganOut = 0; let gtModalDL = 0; let gtOmsetDL = 0;
   (transactions || []).forEach(t => {
     if (t.currency_type === 'TABUNGAN' || t.currency_type === 'IDR') {
@@ -526,11 +557,11 @@ function App() {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3 w-full">
                     <span className="material-symbols-outlined text-[#10b981] finance-card-pulse rounded-full p-1">payments</span>
-                    <input type="text" value={subtitles[`bus_${activePageId}`] || 'Buku Keuangan Utama'} onChange={(e) => setSubtitles({ ...subtitles, [`bus_${activePageId}`]: e.target.value })} className="bg-transparent border-none outline-none font-archivo text-xl font-bold text-[#b9eaff] w-full p-0 focus:ring-0" />
+                    <input type="text" value={subtitles[`bus_${activePageId}`] || 'Buku Keuangan Utama'} onChange={(e) => setSubtitles({ ...subtitles, [`bus_${activePageId}`]: e.target.value })} onBlur={() => saveSubtitlesToDB(subtitles)} className="bg-transparent border-none outline-none font-archivo text-xl font-bold text-[#b9eaff] w-full p-0 focus:ring-0" />
                   </div>
                   <div className="glass-panel px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-2 border-[#10b981]/20 w-fit">
                     <span className="text-[#bdc9cc]">Kurs 1 DL:</span>
-                    <span className="text-[#10b981] font-bold flex items-center">Rp <input type="number" value={dlRate} onChange={(e) => setDlRate(e.target.value)} className="bg-transparent w-14 ml-1 p-0 border-none focus:ring-0 text-[#10b981] outline-none" /></span>
+                    <span className="text-[#10b981] font-bold flex items-center">Rp <input type="number" value={dlRate} onChange={(e) => setDlRate(e.target.value)} onBlur={(e) => saveDlRateToDB(e.target.value)} className="bg-transparent w-14 ml-1 p-0 border-none focus:ring-0 text-[#10b981] outline-none" /></span>
                   </div>
                 </div>
 
@@ -974,11 +1005,11 @@ function App() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[#10b981] finance-card-pulse rounded-full p-1">payments</span>
-                  <input type="text" value={subtitles[`bus_${activePageId}`] || 'Buku Keuangan Utama'} onChange={(e) => setSubtitles({ ...subtitles, [`bus_${activePageId}`]: e.target.value })} className="bg-transparent border-none outline-none font-archivo text-[20px] font-semibold text-[#c1ecff] w-full p-0 focus:ring-0" />
+                  <input type="text" value={subtitles[`bus_${activePageId}`] || 'Buku Keuangan Utama'} onChange={(e) => setSubtitles({ ...subtitles, [`bus_${activePageId}`]: e.target.value })} onBlur={() => saveSubtitlesToDB(subtitles)} className="bg-transparent border-none outline-none font-archivo text-[20px] font-semibold text-[#c1ecff] w-full p-0 focus:ring-0" />
                 </div>
                 <div className="glass-panel px-4 py-1.5 rounded-lg text-[11px] font-anybody tracking-widest flex items-center gap-3 border-[#10b981]/20">
                   <span className="text-[#bdc9cc] uppercase">Kurs 1 DL:</span>
-                  <span className="text-[#10b981] font-bold">Rp <input type="number" value={dlRate} onChange={(e) => setDlRate(e.target.value)} className="bg-transparent w-16 ml-1 p-0 border-none outline-none focus:ring-0 text-[#10b981]" /></span>
+                  <span className="text-[#10b981] font-bold">Rp <input type="number" value={dlRate} onChange={(e) => setDlRate(e.target.value)} onBlur={(e) => saveDlRateToDB(e.target.value)} className="bg-transparent w-16 ml-1 p-0 border-none outline-none focus:ring-0 text-[#10b981]" /></span>
                 </div>
               </div>
 
