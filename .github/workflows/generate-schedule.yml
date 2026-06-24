@@ -1,0 +1,29 @@
+name: Generate Daily Tasks (Jadwal Supabase)
+
+on:
+  schedule:
+    - cron: '0 17 * * *'
+  workflow_dispatch: 
+
+jobs:
+  bikin-jadwal-otomatis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Download repositori lu
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm install @supabase/supabase-js dotenv
+
+      - name: 🚀 Jalankan script cron.js lu
+        env:
+          # Nama variabel di kiri HARUS sama dengan yang lu panggil di process.env file cron.js
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: node cron.js
