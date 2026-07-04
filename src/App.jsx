@@ -101,6 +101,11 @@ function App() {
   const [newTxType, setNewTxType] = useState('pengeluaran'); 
   const [newTxCurrency, setNewTxCurrency] = useState('TABUNGAN'); 
 
+  // Transaction Filter
+  const [txFilter, setTxFilter] = useState('ALL');
+
+  const [gtAssetView, setGtAssetView] = useState('INVENTORY');
+
   const [isTransferring, setIsTransferring] = useState(false);
   const [transferDirection, setTransferDirection] = useState('TABUNGAN_TO_GT');
   const [transferDate, setTransferDate] = useState(todayISOStr);
@@ -158,10 +163,20 @@ function App() {
     const isGtProfit = gtNetDL >= 0;
     const gtNetIDR = gtNetDL * dlRate;
     const totalKekayaanIDR = tabunganBalance + gtNetIDR;
-    return { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR };
+
+    // GT Trades asset calculations
+    const gtTradeModalAktif = (transactions || [])
+      .filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL')
+      .reduce((sum, t) => sum + (t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount)), 0);
+
+    const gtTradeOmset = gtOmsetDL;
+    const gtTradeProfit = gtNetDL;
+
+    return { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR, gtTradeModalAktif, gtTradeOmset, gtTradeProfit };
   }, [transactions, dlRate]);
-  const { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR } = financeData;
+  const { tabunganIn, tabunganOut, gtModalDL, gtOmsetDL, tabunganBalance, gtNetDL, isGtProfit, gtNetIDR, totalKekayaanIDR, gtTradeModalAktif, gtTradeOmset, gtTradeProfit } = financeData;
   const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  const formatGT = (numDL) => { if (!numDL) return '0 DL'; if (numDL >= 100) return `${(numDL / 100).toFixed(2)} BGL`; if (numDL < 1 && numDL > 0) return `${Math.round(numDL * 100)} WL`; return `${numDL.toFixed(2)} DL`; };
 
   // ================= 2. PLANNER LOGIC =================
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -301,7 +316,7 @@ function App() {
   const handleDeleteTargetGroup = (groupType) => { if (window.confirm('Hapus list ini?')) { const groupBlocks = (blocks || []).filter(b => b.type === groupType); groupBlocks.forEach(async (b) => await supabase.from('blocks').delete().eq('id', b.id)); setTargetGroups({ ...targetGroups, [activePageId]: currentPageGroups.filter(g => g !== groupType) }); fetchBlocks(activePageId); } };
 
   const handleTxCategoryToggle = (category) => { setTxCategory(category); if (category === 'TABUNGAN') setNewTxCurrency('TABUNGAN'); else setNewTxCurrency('DL'); };
-  const handleAddTransaction = async () => { if (newTxDesc.trim() === '' || newTxAmount === '') { alert("Isi form!"); return; } const finalCurrency = txCategory === 'TABUNGAN' ? 'TABUNGAN' : newTxCurrency; await supabase.from('growtopia_transactions').insert([{ description: newTxDesc, amount: parseFloat(newTxAmount), type: newTxType, currency_type: finalCurrency, date: newTxDate || todayISOStr, page_id: activePageId }]); setNewTxDesc(''); setNewTxAmount(''); setIsAddingTx(false); setNewTxDate(todayISOStr); fetchTransactions(activePageId); };
+  const handleAddTransaction = async () => { if (newTxDesc.trim() === '' || newTxAmount === '') { alert("Isi form!"); return; } const finalCurrency = txCategory === 'TABUNGAN' ? 'TABUNGAN' : newTxCurrency; let finalType = newTxType; let assetStatus = null; if (newTxType === 'pengeluaran_modal') { finalType = 'pengeluaran'; assetStatus = 'MODAL'; } else if (newTxType === 'pengeluaran') { assetStatus = 'NON_MODAL'; } await supabase.from('growtopia_transactions').insert([{ description: newTxDesc, amount: parseFloat(newTxAmount), type: finalType, currency_type: finalCurrency, date: newTxDate || todayISOStr, page_id: activePageId, asset_status: assetStatus }]); setNewTxDesc(''); setNewTxAmount(''); setIsAddingTx(false); setNewTxDate(todayISOStr); fetchTransactions(activePageId); };
   const handleTransferAction = async () => {
     if (!transferAmountIDR || parseFloat(transferAmountIDR) <= 0) return; const amountIDR = parseFloat(transferAmountIDR); const amountDL = amountIDR / (dlRate || 1); 
     try {
@@ -312,6 +327,10 @@ function App() {
   };
   const handleUpdateTxDate = async (id, newDate) => { if (newDate.trim() !== '') { await supabase.from('growtopia_transactions').update({ date: newDate }).eq('id', id); setEditingTxId(null); fetchTransactions(activePageId); } else { setEditingTxId(null); } };
   const deleteTransaction = async (id) => { if(window.confirm('Hapus transaksi?')) { await supabase.from('growtopia_transactions').delete().eq('id', id); fetchTransactions(activePageId); } };
+
+  // GT Trades CRUD mapped to growtopia_transactions
+
+  const handleDeleteGtTrade = async (id) => { if (window.confirm('Hapus aset ini? Transaksi Ledger akan ikut terhapus.')) { await supabase.from('growtopia_transactions').delete().eq('id', id); fetchTransactions(activePageId); } };
 
   // ================= LOGIKA AUTO-MERGE PILLARS (FIX BUG DATA HILANG) =================
   const [localPillars, setLocalPillars] = useState(() => { try { return JSON.parse(localStorage.getItem('custom_pillars')) || ["Study", "Sport", "Business"]; } catch(e) { return ["Study"]; } });
@@ -613,6 +632,11 @@ function App() {
                 <div className="glass-panel p-4 rounded-xl shadow-xl">
                     <div className="flex flex-col mb-4 gap-3">
                       <h3 className="text-sm font-bold font-archivo text-[#b9eaff]">Riwayat Transaksi</h3>
+                      <div className="flex bg-[#000b14] p-1 rounded-lg border border-[#7ae6ff]/15 w-full">
+                        {[['ALL','Semua'],['IN','Masuk'],['OUT','Keluar']].map(([val, label]) => (
+                          <button key={val} onClick={() => setTxFilter(val)} className={`flex-1 py-1.5 text-[10px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${txFilter === val ? (val === 'IN' ? 'bg-[#10b981] text-white shadow-lg' : val === 'OUT' ? 'bg-[#ffb4ab] text-[#690005] shadow-lg' : 'bg-[#7ae6ff] text-[#001017] shadow-lg') : 'text-[#bdc9cc] hover:text-[#dff8ff]'}`}>{label}</button>
+                        ))}
+                      </div>
                       <div className="flex gap-2 w-full">
                           <button onClick={() => {setIsAddingTx(!isAddingTx); setIsTransferring(false);}} className={`flex-1 justify-center px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${isAddingTx ? 'bg-[#ffb4ab] text-[#690005] shadow-lg' : 'bg-[#dff8ff] text-[#00363f]'}`}>
                               <span className="material-symbols-outlined text-[14px]">{isAddingTx ? 'close' : 'add'}</span> <span>{isAddingTx ? 'Batal' : 'Transaksi Baru'}</span>
@@ -647,7 +671,7 @@ function App() {
                         <input type="text" value={newTxDesc} onChange={(e) => setNewTxDesc(e.target.value)} placeholder="Rincian..." className="w-full bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-xs mb-3" />
                         <div className="flex gap-2 mb-3">
                           <input type="date" value={newTxDate} onChange={(e) => setNewTxDate(e.target.value)} className="w-1/2 bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-2 py-2 outline-none text-[#b9eaff] text-xs" />
-                          <select value={newTxType} onChange={(e) => setNewTxType(e.target.value)} className="w-1/2 bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-xs"><option value="pengeluaran">Keluar (-)</option><option value="pemasukan">Masuk (+)</option></select>
+                          <select value={newTxType} onChange={(e) => setNewTxType(e.target.value)} className="w-1/2 bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-xs"><option value="pengeluaran">Keluar (Bukan Modal) (-)</option><option value="pengeluaran_modal">Keluar (Modal) (-)</option><option value="pemasukan">Masuk (+)</option></select>
                         </div>
                         <div className="flex gap-2 mb-3">
                           <input type="number" value={newTxAmount} onChange={(e) => setNewTxAmount(e.target.value)} placeholder="0" className="flex-1 bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-xs" />
@@ -658,7 +682,7 @@ function App() {
                     )}
 
                     <div className="space-y-3 mt-4">
-                      {(transactions||[]).map((t) => {
+                      {(transactions||[]).filter(t => txFilter === 'ALL' ? true : txFilter === 'IN' ? t.type === 'pemasukan' : t.type === 'pengeluaran').map((t) => {
                         const isTabungan = t.currency_type === 'TABUNGAN' || t.currency_type === 'IDR';
                         const isMasuk = t.type === 'pemasukan';
                         return (
@@ -676,11 +700,82 @@ function App() {
                           </div>
                           <div className="text-left pl-11">
                                <span className={`font-data-mono text-sm font-bold ${isMasuk ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{isMasuk ? '+' : '-'}{isTabungan ? formatIDR(t.amount) : `${t.amount} ${t.currency_type}`}</span>
+                               {!isTabungan && <p className="text-[10px] text-[#879396] mt-0.5 font-anybody">≈ {formatIDR((t.currency_type === 'BGL' ? t.amount * 100 : (t.currency_type === 'WL' ? t.amount / 100 : t.amount)) * dlRate)}</p>}
                           </div>
                         </div>
                       )})}
-                      {(transactions||[]).length === 0 && <div className="py-8 text-center border border-dashed border-[#7ae6ff]/15 rounded-xl"><p className="text-xs text-[#bdc9cc]">Belum ada riwayat keuangan tercatat.</p></div>}
+                      {(transactions||[]).filter(t => txFilter === 'ALL' ? true : txFilter === 'IN' ? t.type === 'pemasukan' : t.type === 'pengeluaran').length === 0 && <div className="py-8 text-center border border-dashed border-[#7ae6ff]/15 rounded-xl"><p className="text-xs text-[#bdc9cc]">Belum ada riwayat keuangan tercatat.</p></div>}
                     </div>
+                </div>
+
+                {/* GROWTOPIA ASSET MANAGEMENT - MOBILE */}
+                <div className="glass-panel p-4 rounded-xl shadow-xl animate-entrance" style={{ animationDelay: '0.3s' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-[#00c8f9]">sports_esports</span>
+                    <h3 className="text-sm font-bold font-archivo text-[#b9eaff]">Manajemen Aset Growtopia</h3>
+                  </div>
+
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-[#000b14] p-3 rounded-xl border border-[#ffb4ab]/20">
+                      <p className="text-[9px] font-anybody uppercase text-[#bdc9cc] mb-1">Modal Aktif</p>
+                      <p className="text-lg font-bold font-archivo text-[#ffb4ab]">{formatGT(gtTradeModalAktif)}</p>
+                      <p className="text-[9px] text-[#bdc9cc] mt-1">{(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').length} item di-hold</p>
+                    </div>
+                    <div className="bg-[#000b14] p-3 rounded-xl border border-[#10b981]/20">
+                      <p className="text-[9px] font-anybody uppercase text-[#bdc9cc] mb-1">Total Omset</p>
+                      <p className="text-lg font-bold font-archivo text-[#10b981]">{formatGT(gtTradeOmset)}</p>
+                      <p className={`text-[9px] mt-1 ${gtTradeProfit >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>Profit: {formatGT(gtTradeProfit)}</p>
+                    </div>
+                  </div>
+
+                  {/* View Toggle */}
+                  <div className="flex bg-[#000b14] p-1 rounded-lg border border-[#7ae6ff]/15 mb-4">
+                    <button onClick={() => setGtAssetView('INVENTORY')} className={`flex-1 py-1.5 text-[10px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${gtAssetView === 'INVENTORY' ? 'bg-[#00c8f9] text-[#005065] shadow-lg' : 'text-[#bdc9cc]'}`}>📦 Inventory</button>
+                    <button onClick={() => setGtAssetView('HISTORY')} className={`flex-1 py-1.5 text-[10px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${gtAssetView === 'HISTORY' ? 'bg-[#10b981] text-white shadow-lg' : 'text-[#bdc9cc]'}`}>📊 Riwayat Omset</button>
+                  </div>
+
+                  {gtAssetView === 'INVENTORY' && (
+                    <div className="space-y-2">
+                      {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').map(trade => (
+                        <div key={trade.id} className="p-3 bg-[#000b14] rounded-xl border border-[#7ae6ff]/15 flex justify-between items-center group">
+                          <div>
+                            <p className="text-xs font-bold text-[#b9eaff]">{trade.description.replace('Beli Aset: ', '')}</p>
+                            <p className="text-[10px] text-[#bdc9cc] mt-1">Modal: <span className="text-[#ffb4ab] font-bold">{trade.amount} {trade.currency_type}</span></p>
+                          </div>
+                          <button onClick={() => handleDeleteGtTrade(trade.id)} className="text-[#ffb4ab]/50 p-1"><span className="material-symbols-outlined text-[14px]">delete</span></button>
+                        </div>
+                      ))}
+                      {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').length === 0 && (
+                        <div className="py-6 text-center border border-dashed border-[#00c8f9]/20 rounded-xl"><p className="text-xs text-[#bdc9cc]">Belum ada aset modal yang dicatat.</p></div>
+                      )}
+                    </div>
+                  )}
+                  {gtAssetView === 'HISTORY' && (
+                    <div className="space-y-2">
+                      {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pemasukan').map(trade => {
+                        const amountDL = trade.currency_type === 'BGL' ? trade.amount * 100 : (trade.currency_type === 'WL' ? trade.amount / 100 : trade.amount);
+                        return (
+                          <div key={trade.id} className="p-3 bg-[#000b14] rounded-xl border border-[#7ae6ff]/15 flex justify-between items-center group">
+                            <div>
+                              <p className="text-xs font-bold text-[#b9eaff]">{trade.description}</p>
+                              <p className="text-[9px] text-[#879396] mt-1">{trade.date}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                <span className="text-sm font-bold font-archivo text-[#10b981]">+{formatGT(amountDL)}</span>
+                                <p className="text-[9px] text-[#879396] font-anybody mt-0.5">≈ {formatIDR(amountDL * dlRate)}</p>
+                              </div>
+                              <button onClick={() => handleDeleteGtTrade(trade.id)} className="text-[#ffb4ab]/50 p-1"><span className="material-symbols-outlined text-[12px]">delete</span></button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pemasukan').length === 0 && (
+                        <div className="py-6 text-center border border-dashed border-[#10b981]/20 rounded-xl"><p className="text-xs text-[#bdc9cc]">Belum ada riwayat pemasukan.</p></div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -1065,7 +1160,14 @@ function App() {
 
               <div className="glass-panel p-6 rounded-xl shadow-xl">
                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-base font-semibold text-[#c1ecff]">Buku Kas Transaksi (Ledger)</h3>
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-base font-semibold text-[#c1ecff]">Buku Kas Transaksi (Ledger)</h3>
+                      <div className="flex bg-[#000b14] p-1 rounded-lg border border-[#7ae6ff]/15">
+                        {[['ALL','Semua'],['IN','Masuk'],['OUT','Keluar']].map(([val, label]) => (
+                          <button key={val} onClick={() => setTxFilter(val)} className={`px-4 py-1.5 text-[10px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${txFilter === val ? (val === 'IN' ? 'bg-[#10b981] text-white shadow-lg' : val === 'OUT' ? 'bg-[#ffb4ab] text-[#690005] shadow-lg' : 'bg-[#7ae6ff] text-[#001017] shadow-lg') : 'text-[#bdc9cc] hover:text-[#dff8ff]'}`}>{label}</button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="flex gap-3">
                         <button onClick={() => {setIsAddingTx(!isAddingTx); setIsTransferring(false);}} className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${isAddingTx ? 'bg-[#ffb4ab] text-[#690005]' : 'bg-[#7ae6ff]/20 text-[#7ae6ff] hover:bg-[#7ae6ff]/30 border border-[#7ae6ff]/30'}`}><FaPlus /> Transaksi Kas</button>
                         <button onClick={() => {setIsTransferring(!isTransferring); setIsAddingTx(false);}} className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${isTransferring ? 'bg-[#ffb4ab] text-[#690005]' : 'bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/30 border border-[#10b981]/30'}`}>⇄ Konversi Aset</button>
@@ -1087,14 +1189,14 @@ function App() {
                       <div className="flex bg-[#000b14] rounded-lg border border-[#7ae6ff]/15 p-1"><button onClick={() => handleTxCategoryToggle('TABUNGAN')} className={`px-4 py-1.5 text-[11px] font-bold rounded uppercase ${txCategory === 'TABUNGAN' ? 'bg-[#10b981] text-[#001017]' : 'text-[#bdc9cc]'}`}>Bank</button><button onClick={() => handleTxCategoryToggle('GT')} className={`px-4 py-1.5 text-[11px] font-bold rounded uppercase ${txCategory === 'GT' ? 'bg-[#00c8f9] text-[#005065]' : 'text-[#bdc9cc]'}`}>Aset GT</button></div>
                       <div className="flex-1"><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Deskripsi</label><input type="text" autoFocus value={newTxDesc} onChange={(e) => setNewTxDesc(e.target.value)} placeholder="Misal: Beli 200 Ghost Jar" className="w-full bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm focus:border-[#7ae6ff]" /></div>
                       <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Tanggal</label><input type="date" value={newTxDate} onChange={(e) => setNewTxDate(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm" /></div>
-                      <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Tipe</label><select value={newTxType} onChange={(e) => setNewTxType(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm"><option value="pengeluaran">Keluar (-)</option><option value="pemasukan">Masuk (+)</option></select></div>
+                      <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Tipe</label><select value={newTxType} onChange={(e) => setNewTxType(e.target.value)} className="bg-[#000b14] border border-[#7ae6ff]/15 rounded-lg px-3 py-2 outline-none text-[#b9eaff] text-sm"><option value="pengeluaran">Keluar (Bukan Modal) (-)</option><option value="pengeluaran_modal">Keluar (Modal) (-)</option><option value="pemasukan">Masuk (+)</option></select></div>
                       <div><label className="block text-[11px] text-[#bdc9cc] mb-1.5 uppercase font-anybody">Jumlah</label><div className="flex"><input type="number" value={newTxAmount} onChange={(e) => setNewTxAmount(e.target.value)} placeholder="0" className="w-24 bg-[#000b14] border border-[#7ae6ff]/15 rounded-l-lg px-3 py-2 outline-none text-[#b9eaff] text-sm" />{txCategory === 'GT' ? <select value={newTxCurrency} onChange={(e) => setNewTxCurrency(e.target.value)} className="w-20 bg-[#002e3c] border border-[#7ae6ff]/15 rounded-r-lg px-2 py-2 outline-none text-[#b9eaff] text-sm"><option value="WL">WL</option><option value="DL">DL</option><option value="BGL">BGL</option></select> : <span className="bg-[#002e3c] border border-[#7ae6ff]/15 rounded-r-lg px-4 py-2 text-sm text-[#b9eaff] flex items-center font-bold">IDR</span>}</div></div>
                       <button onClick={handleAddTransaction} className="bg-[#7ae6ff] hover:bg-[#dff8ff] text-[#00343d] px-6 py-2.5 rounded-lg text-sm font-bold shadow-[0_0_15px_rgba(122,230,255,0.3)] transition-all">Simpan</button>
                     </div>
                  )}
 
                  <div className="space-y-2 mt-4">
-                    {(transactions||[]).map((t) => {
+                    {(transactions||[]).filter(t => txFilter === 'ALL' ? true : txFilter === 'IN' ? t.type === 'pemasukan' : t.type === 'pengeluaran').map((t) => {
                       const isTabungan = t.currency_type === 'TABUNGAN' || t.currency_type === 'IDR';
                       const isMasuk = t.type === 'pemasukan';
                       return (
@@ -1118,7 +1220,100 @@ function App() {
                         </div>
                       </div>
                     )})}
+                    {(transactions||[]).filter(t => txFilter === 'ALL' ? true : txFilter === 'IN' ? t.type === 'pemasukan' : t.type === 'pengeluaran').length === 0 && <div className="py-8 text-center border border-dashed border-[#7ae6ff]/15 rounded-xl"><p className="text-sm text-[#bdc9cc]">Belum ada riwayat keuangan tercatat.</p></div>}
                  </div>
+              </div>
+
+              {/* GROWTOPIA ASSET MANAGEMENT - DESKTOP */}
+              <div className="glass-panel finance-card-pulse p-6 rounded-xl shadow-xl animate-entrance" style={{ animationDelay: '0.3s' }}>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[#00c8f9]" style={{ fontSize: '24px' }}>sports_esports</span>
+                    <h3 className="text-base font-semibold text-[#c1ecff]">Manajemen Aset Growtopia</h3>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex bg-[#000b14] p-1 rounded-lg border border-[#7ae6ff]/15">
+                      <button onClick={() => setGtAssetView('INVENTORY')} className={`px-5 py-1.5 text-[11px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${gtAssetView === 'INVENTORY' ? 'bg-[#00c8f9] text-[#005065] shadow-lg' : 'text-[#bdc9cc] hover:text-[#dff8ff]'}`}>📦 Inventory (Modal)</button>
+                      <button onClick={() => setGtAssetView('HISTORY')} className={`px-5 py-1.5 text-[11px] font-bold font-anybody rounded-md uppercase transition-all duration-200 ${gtAssetView === 'HISTORY' ? 'bg-[#10b981] text-white shadow-lg' : 'text-[#bdc9cc] hover:text-[#dff8ff]'}`}>📊 Riwayat Omset</button>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-[#000b14] p-4 rounded-xl border border-[#ffb4ab]/15 relative overflow-hidden">
+                    <div className="absolute -bottom-2 -right-2 opacity-10"><span className="material-symbols-outlined text-[#ffb4ab]" style={{ fontSize: '80px' }}>inventory_2</span></div>
+                    <p className="text-[10px] font-anybody uppercase text-[#bdc9cc] mb-1 tracking-widest">Modal Aktif</p>
+                    <p className="text-xl font-bold font-archivo text-[#ffb4ab] relative z-10">{formatGT(gtTradeModalAktif)}</p>
+                    <p className="text-[10px] text-[#bdc9cc] mt-1">{(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').length} item di-hold</p>
+                  </div>
+                  <div className="bg-[#000b14] p-4 rounded-xl border border-[#10b981]/15 relative overflow-hidden">
+                    <div className="absolute -bottom-2 -right-2 opacity-10"><span className="material-symbols-outlined text-[#10b981]" style={{ fontSize: '80px' }}>paid</span></div>
+                    <p className="text-[10px] font-anybody uppercase text-[#bdc9cc] mb-1 tracking-widest">Total Omset</p>
+                    <p className="text-xl font-bold font-archivo text-[#10b981] relative z-10">{formatGT(gtTradeOmset)}</p>
+                    <p className="text-[10px] text-[#bdc9cc] mt-1">{(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pemasukan').length} terjual</p>
+                  </div>
+                  <div className={`bg-[#000b14] p-4 rounded-xl border relative overflow-hidden ${gtTradeProfit >= 0 ? 'border-[#10b981]/15' : 'border-[#ffb4ab]/15'}`}>
+                    <div className="absolute -bottom-2 -right-2 opacity-10"><span className={`material-symbols-outlined ${gtTradeProfit >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`} style={{ fontSize: '80px' }}>trending_up</span></div>
+                    <p className="text-[10px] font-anybody uppercase text-[#bdc9cc] mb-1 tracking-widest">Net Profit</p>
+                    <p className={`text-xl font-bold font-archivo relative z-10 ${gtTradeProfit >= 0 ? 'text-[#10b981]' : 'text-[#ffb4ab]'}`}>{gtTradeProfit >= 0 ? '+' : ''}{formatGT(gtTradeProfit)}</p>
+                    <p className="text-[10px] text-[#bdc9cc] mt-1">Margin keuntungan</p>
+                  </div>
+                </div>
+
+
+
+                {/* Inventory View */}
+                {gtAssetView === 'INVENTORY' && (
+                  <div className="space-y-2">
+                    {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').map(trade => (
+                      <div key={trade.id} className="flex justify-between items-center p-4 bg-[#001017] hover:bg-[#7ae6ff]/5 rounded-xl border border-[#7ae6ff]/10 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border bg-[#00c8f9]/10 text-[#00c8f9] border-[#00c8f9]/30"><span className="material-symbols-outlined text-[18px]">inventory_2</span></div>
+                          <div>
+                            <p className="text-[#c1ecff] text-[15px] font-semibold">{trade.description.replace('Beli Aset: ', '')}</p>
+                            <p className="text-[11px] text-[#879396] mt-1 font-anybody">Modal: <span className="text-[#ffb4ab] font-bold">{trade.amount} {trade.currency_type}</span></p>
+                          </div>
+                        </div>
+                        <button onClick={() => handleDeleteGtTrade(trade.id)} className="text-[#ffb4ab]/60 opacity-0 group-hover:opacity-100 hover:text-[#ffb4ab] p-2 hover:bg-[#ffb4ab]/10 rounded-lg transition-all"><span className="material-symbols-outlined text-[18px]">delete</span></button>
+                      </div>
+                    ))}
+                    {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pengeluaran' && t.asset_status !== 'NON_MODAL').length === 0 && (
+                      <div className="py-8 text-center border border-dashed border-[#00c8f9]/20 rounded-xl"><span className="material-symbols-outlined text-4xl mb-2 text-[#879396]">inventory_2</span><p className="text-sm text-[#bdc9cc]">Belum ada aset modal yang tercatat.</p></div>
+                    )}
+                  </div>
+                )}
+
+                {/* History View */}
+                {gtAssetView === 'HISTORY' && (
+                  <div className="space-y-2">
+                    {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pemasukan').map(trade => {
+                      const amountDL = trade.currency_type === 'BGL' ? trade.amount * 100 : (trade.currency_type === 'WL' ? trade.amount / 100 : trade.amount);
+                      return (
+                        <div key={trade.id} className="flex justify-between items-center p-4 bg-[#001017] hover:bg-[#7ae6ff]/5 rounded-xl border border-[#7ae6ff]/10 transition-colors group">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border bg-[#10b981]/10 text-[#10b981] border-[#10b981]/30"><span className="material-symbols-outlined text-[18px]">trending_up</span></div>
+                            <div>
+                              <p className="text-[#c1ecff] text-[15px] font-semibold">{trade.description}</p>
+                              <p className="text-[11px] font-anybody text-[#879396] mt-1.5">{trade.date}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <span className="font-archivo text-[18px] font-bold text-[#10b981]">+{formatGT(amountDL)}</span>
+                              <p className="text-[11px] text-[#879396] font-anybody mt-1">≈ {formatIDR(amountDL * dlRate)}</p>
+                            </div>
+                            <button onClick={() => handleDeleteGtTrade(trade.id)} className="text-[#ffb4ab]/60 opacity-0 group-hover:opacity-100 hover:text-[#ffb4ab] p-2 hover:bg-[#ffb4ab]/10 rounded-lg transition-all"><span className="material-symbols-outlined text-[18px]">delete</span></button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {(transactions||[]).filter(t => ['WL', 'DL', 'BGL'].includes(t.currency_type) && t.type === 'pemasukan').length === 0 && (
+                      <div className="py-8 text-center border border-dashed border-[#10b981]/20 rounded-xl"><span className="material-symbols-outlined text-4xl mb-2 text-[#879396]">receipt_long</span><p className="text-sm text-[#bdc9cc]">Belum ada riwayat pemasukan.</p></div>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
           )}
