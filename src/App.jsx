@@ -544,8 +544,9 @@ function StudyWorkspacePage({
 }) {
   const [timerSeconds, setTimerSeconds] = useState(25 * 60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [scratchpadContent, setScratchpadContent] = useState('# Dijkstra Algorithm\nimport heapq\n\ndef dijkstra(graph, start):\n    distances = {node: float("inf") for node in graph}\n    distances[start] = 0\n    pq = [(0, start)]\n    \n    while pq:\n        curr_dist, u = heapq.heappop(pq)\n        if curr_dist > distances[u]:\n            continue\n        for v, weight in graph[u].items():\n            if distances[u] + weight < distances[v]:\n                distances[v] = distances[u] + weight\n                heapq.heappush(pq, (distances[v], v))\n    return distances');
-  const [saveStatus, setSaveStatus] = useState('Auto-saved 2m ago');
+  const [scratchpadContent, setScratchpadContent] = useState('');
+  const [saveStatus, setSaveStatus] = useState('');
+
   const timerRef = useRef(null);
 
   const formatTime = (sec) => {
@@ -874,38 +875,31 @@ function StudyWorkspacePage({
             <div className="grid grid-cols-2 gap-step-sm">
               <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1deg]">
                 <div className="flex items-center justify-between border-b border-[#ca8a04]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">ALGORITMA BIG-O</span>
+                  <span className="font-label-sm text-[10px] font-bold">NOTE 1</span>
                   <span className="material-symbols-outlined text-[12px] text-[#ca8a04]">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight">
-                  • Array: O(n)<br />• Binary: O(log n)<br />• MergeSort: O(n log n)<br />• Quick worst: O(n²)
-                </p>
+                <p className="font-label-sm text-[11px] leading-tight text-[#92400e]/60 italic">Tulis catatan di sini...</p>
               </div>
               <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1.5deg]">
                 <div className="flex items-center justify-between border-b border-[#16a34a]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">API ENDPOINTS</span>
+                  <span className="font-label-sm text-[10px] font-bold">NOTE 2</span>
                   <span className="material-symbols-outlined text-[12px] text-[#16a34a]">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight font-mono">
-                  GET /api/v1/vault<br />POST /auth/token<br />Mock: port :8080
-                </p>
+                <p className="font-label-sm text-[11px] leading-tight text-[#166534]/60 italic">Tulis catatan di sini...</p>
               </div>
               <div className="bg-[#e0e7ff] text-[#1e1b4b] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1.5deg]">
                 <div className="flex items-center justify-between border-b border-[#4f46e5]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">SEMESTER PLEDGE</span>
+                  <span className="font-label-sm text-[10px] font-bold">NOTE 3</span>
                   <span className="material-symbols-outlined text-[12px] text-[#4f46e5]">push_pin</span>
                 </div>
-                <p className="font-headline-sm text-[15px] font-bold leading-tight">TARGET IPK &gt; 3.80!</p>
-                <p className="font-body-sm text-[10px] text-[#312e81] mt-pixel-unit">No failed raids!</p>
+                <p className="font-label-sm text-[11px] leading-tight text-[#312e81]/60 italic">Tulis catatan di sini...</p>
               </div>
               <div className="bg-[#fee2e2] text-[#7f1d1d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1deg]">
                 <div className="flex items-center justify-between border-b border-[#dc2626]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">REMINDER</span>
-                  <span className="material-symbols-outlined text-[12px] text-[#dc2626]">priority_high</span>
+                  <span className="font-label-sm text-[10px] font-bold">NOTE 4</span>
+                  <span className="material-symbols-outlined text-[12px] text-[#dc2626]">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight">
-                  Bimbingan TA: Jumat 15:00 WIB. Print draft bab 1-2!
-                </p>
+                <p className="font-label-sm text-[11px] leading-tight text-[#991b1b]/60 italic">Tulis catatan di sini...</p>
               </div>
             </div>
           </div>
