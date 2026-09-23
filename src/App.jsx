@@ -547,6 +547,32 @@ function StudyWorkspacePage({
   const [scratchpadContent, setScratchpadContent] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
 
+  // Sticky Notes — persisted to localStorage
+  const [stickyNotes, setStickyNotes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sticky_notes')) || [
+        { title: 'NOTE 1', content: '' },
+        { title: 'NOTE 2', content: '' },
+        { title: 'NOTE 3', content: '' },
+        { title: 'NOTE 4', content: '' },
+      ];
+    } catch (e) {
+      return [
+        { title: 'NOTE 1', content: '' },
+        { title: 'NOTE 2', content: '' },
+        { title: 'NOTE 3', content: '' },
+        { title: 'NOTE 4', content: '' },
+      ];
+    }
+  });
+
+  const updateStickyNote = (index, field, value) => {
+    const updated = stickyNotes.map((n, i) => i === index ? { ...n, [field]: value } : n);
+    setStickyNotes(updated);
+    localStorage.setItem('sticky_notes', JSON.stringify(updated));
+  };
+
+
   const timerRef = useRef(null);
 
   const formatTime = (sec) => {
@@ -873,33 +899,81 @@ function StudyWorkspacePage({
               </div>
             </div>
             <div className="grid grid-cols-2 gap-step-sm">
-              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1deg]">
+              {/* NOTE 1 — Kuning */}
+              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#ca8a04]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">NOTE 1</span>
-                  <span className="material-symbols-outlined text-[12px] text-[#ca8a04]">push_pin</span>
+                  <input
+                    type="text"
+                    value={stickyNotes[0].title}
+                    onChange={e => updateStickyNote(0, 'title', e.target.value)}
+                    className="bg-transparent font-label-sm text-[10px] font-bold text-[#422006] outline-none w-full border-none"
+                    placeholder="Judul..."
+                  />
+                  <span className="material-symbols-outlined text-[12px] text-[#ca8a04] shrink-0">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight text-[#92400e]/60 italic">Tulis catatan di sini...</p>
+                <textarea
+                  value={stickyNotes[0].content}
+                  onChange={e => updateStickyNote(0, 'content', e.target.value)}
+                  className="bg-transparent font-label-sm text-[11px] leading-tight text-[#422006] outline-none resize-none flex-1 min-h-[60px] placeholder:text-[#92400e]/50 placeholder:italic"
+                  placeholder="Tulis catatan di sini..."
+                />
               </div>
-              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1.5deg]">
+              {/* NOTE 2 — Hijau */}
+              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1.5deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#16a34a]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">NOTE 2</span>
-                  <span className="material-symbols-outlined text-[12px] text-[#16a34a]">push_pin</span>
+                  <input
+                    type="text"
+                    value={stickyNotes[1].title}
+                    onChange={e => updateStickyNote(1, 'title', e.target.value)}
+                    className="bg-transparent font-label-sm text-[10px] font-bold text-[#14532d] outline-none w-full border-none"
+                    placeholder="Judul..."
+                  />
+                  <span className="material-symbols-outlined text-[12px] text-[#16a34a] shrink-0">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight text-[#166534]/60 italic">Tulis catatan di sini...</p>
+                <textarea
+                  value={stickyNotes[1].content}
+                  onChange={e => updateStickyNote(1, 'content', e.target.value)}
+                  className="bg-transparent font-label-sm text-[11px] leading-tight text-[#14532d] outline-none resize-none flex-1 min-h-[60px] placeholder:text-[#166534]/50 placeholder:italic"
+                  placeholder="Tulis catatan di sini..."
+                />
               </div>
-              <div className="bg-[#e0e7ff] text-[#1e1b4b] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1.5deg]">
+              {/* NOTE 3 — Biru/Ungu */}
+              <div className="bg-[#e0e7ff] text-[#1e1b4b] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1.5deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#4f46e5]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">NOTE 3</span>
-                  <span className="material-symbols-outlined text-[12px] text-[#4f46e5]">push_pin</span>
+                  <input
+                    type="text"
+                    value={stickyNotes[2].title}
+                    onChange={e => updateStickyNote(2, 'title', e.target.value)}
+                    className="bg-transparent font-label-sm text-[10px] font-bold text-[#1e1b4b] outline-none w-full border-none"
+                    placeholder="Judul..."
+                  />
+                  <span className="material-symbols-outlined text-[12px] text-[#4f46e5] shrink-0">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight text-[#312e81]/60 italic">Tulis catatan di sini...</p>
+                <textarea
+                  value={stickyNotes[2].content}
+                  onChange={e => updateStickyNote(2, 'content', e.target.value)}
+                  className="bg-transparent font-label-sm text-[11px] leading-tight text-[#1e1b4b] outline-none resize-none flex-1 min-h-[60px] placeholder:text-[#312e81]/50 placeholder:italic"
+                  placeholder="Tulis catatan di sini..."
+                />
               </div>
-              <div className="bg-[#fee2e2] text-[#7f1d1d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1deg]">
+              {/* NOTE 4 — Merah */}
+              <div className="bg-[#fee2e2] text-[#7f1d1d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#dc2626]/40 pb-pixel-unit mb-step-xs">
-                  <span className="font-label-sm text-[10px] font-bold">NOTE 4</span>
-                  <span className="material-symbols-outlined text-[12px] text-[#dc2626]">push_pin</span>
+                  <input
+                    type="text"
+                    value={stickyNotes[3].title}
+                    onChange={e => updateStickyNote(3, 'title', e.target.value)}
+                    className="bg-transparent font-label-sm text-[10px] font-bold text-[#7f1d1d] outline-none w-full border-none"
+                    placeholder="Judul..."
+                  />
+                  <span className="material-symbols-outlined text-[12px] text-[#dc2626] shrink-0">push_pin</span>
                 </div>
-                <p className="font-label-sm text-[11px] leading-tight text-[#991b1b]/60 italic">Tulis catatan di sini...</p>
+                <textarea
+                  value={stickyNotes[3].content}
+                  onChange={e => updateStickyNote(3, 'content', e.target.value)}
+                  className="bg-transparent font-label-sm text-[11px] leading-tight text-[#7f1d1d] outline-none resize-none flex-1 min-h-[60px] placeholder:text-[#991b1b]/50 placeholder:italic"
+                  placeholder="Tulis catatan di sini..."
+                />
               </div>
             </div>
           </div>
@@ -1530,8 +1604,9 @@ function App() {
   };
 
   useEffect(() => {
+    // Always fetch daily tasks (tidak tergantung activePageId) agar Quest Log selalu bisa dipakai
+    fetchTasksData(selectedDate, activePage_page?.pillar || '');
     if (activePageId) {
-      fetchTasksData(selectedDate, activePage_page?.pillar || '');
       fetchBlocks(activePageId);
       fetchTransactions(activePageId);
     }
