@@ -523,6 +523,222 @@ function CommandCenterPage({
 }
 
 // ============================================================
+// ============================================================
+// BOOK MODAL — Minecraft-Style Enchanted Book
+// ============================================================
+const PAGE_BREAK = '\n===PAGE===\n';
+const CHARS_PER_PAGE = 480;
+
+function BookModal({ note, onClose, onSave, onDelete }) {
+  const rawPages = note.content ? note.content.split(PAGE_BREAK) : [''];
+  const [pages, setPages] = useState(rawPages.length > 0 ? rawPages : ['']);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [title, setTitle] = useState(note.title || 'Enchanted Book');
+  const [isFlipping, setIsFlipping] = useState(false);
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) textareaRef.current.focus();
+  }, [currentPage]);
+
+  const goToPage = (dir) => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      setCurrentPage(p => Math.max(0, Math.min(pages.length - 1, p + dir)));
+      setIsFlipping(false);
+    }, 180);
+  };
+
+  const updateCurrentPage = (text) => {
+    const updated = [...pages];
+    updated[currentPage] = text;
+    setPages(updated);
+  };
+
+  const addPage = () => {
+    const updated = [...pages, ''];
+    setPages(updated);
+    setIsFlipping(true);
+    setTimeout(() => {
+      setCurrentPage(updated.length - 1);
+      setIsFlipping(false);
+    }, 180);
+  };
+
+  const deletePage = () => {
+    if (pages.length === 1) { updateCurrentPage(''); return; }
+    const updated = pages.filter((_, i) => i !== currentPage);
+    setPages(updated);
+    setCurrentPage(p => Math.max(0, p - 1));
+  };
+
+  const handleSave = () => {
+    const content = pages.join(PAGE_BREAK);
+    onSave(note.id, content, title);
+    onClose();
+  };
+
+  // Spiral binding dots
+  const spiralDots = Array.from({ length: 14 });
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(6,32,13,0.75)', backdropFilter: 'blur(3px)' }}
+      onClick={e => { if (e.target === e.currentTarget) { handleSave(); } }}
+    >
+      <div className="book-open relative flex flex-col" style={{ width: 380, maxWidth: '95vw' }}>
+
+        {/* ── BOOK OUTER COVER ── */}
+        <div
+          className="relative w-full"
+          style={{
+            background: 'linear-gradient(135deg, #7c3d1a 0%, #5c2a0f 40%, #7c3d1a 100%)',
+            border: '4px solid #3d1a08',
+            boxShadow: '6px 6px 0 0 #1c0a02, inset 0 0 0 2px #a0522d',
+            borderRadius: 2,
+            padding: '10px 10px 10px 36px',
+            minHeight: 480,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Spiral binding */}
+          <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center justify-center gap-[10px] pl-[6px] pr-[4px]" style={{ width: 30 }}>
+            {spiralDots.map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 14,
+                  height: 12,
+                  border: '2px solid #8b1a1a',
+                  borderLeft: 'none',
+                  borderRadius: '0 6px 6px 0',
+                  background: '#c0392b',
+                  boxShadow: '1px 0 0 0 #5a0a0a',
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Book pages area */}
+          <div
+            className={`book-paper book-lines flex-1 flex flex-col relative ${isFlipping ? 'page-flip' : ''}`}
+            style={{
+              border: '2px solid #8b6914',
+              boxShadow: 'inset 0 0 0 1px rgba(139,105,20,0.3)',
+              padding: '14px 14px 10px 14px',
+              minHeight: 400,
+            }}
+          >
+            {/* Page corner dog-ear */}
+            <div style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 0, height: 0,
+              borderStyle: 'solid',
+              borderWidth: '0 0 22px 22px',
+              borderColor: 'transparent transparent #c8a95a transparent',
+              filter: 'drop-shadow(-1px -1px 0 #8b6914)',
+            }} />
+
+            {/* Page header */}
+            <div className="flex items-start justify-between mb-2">
+              {/* Editable title */}
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className="bg-transparent font-label-lg text-[13px] font-bold text-[#4a2c0a] outline-none border-b border-[#8b6914]/40 flex-1 mr-2 leading-tight"
+                placeholder="Judul buku..."
+                style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                onClick={e => e.stopPropagation()}
+              />
+              <span
+                className="font-label-sm text-[10px] text-[#6b4c1a] shrink-0"
+                style={{ fontFamily: '"JetBrains Mono", monospace' }}
+              >
+                Page {currentPage + 1} of {pages.length}
+              </span>
+            </div>
+
+            {/* Editable page content */}
+            <textarea
+              ref={textareaRef}
+              value={pages[currentPage] || ''}
+              onChange={e => updateCurrentPage(e.target.value)}
+              className="flex-1 bg-transparent resize-none outline-none text-[#2d1a06] leading-[28px]"
+              style={{
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 13,
+                minHeight: 300,
+                paddingTop: 4,
+              }}
+              placeholder="Tulis catatan di sini..."
+              onClick={e => e.stopPropagation()}
+            />
+
+            {/* Page navigation */}
+            <div className="flex items-center justify-between mt-2 pt-1" style={{ borderTop: '1px solid rgba(139,105,20,0.25)' }}>
+              <button
+                onClick={e => { e.stopPropagation(); deletePage(); }}
+                className="font-label-sm text-[10px] text-[#8b1a1a] hover:underline"
+                style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                title="Hapus halaman ini"
+              >
+                – Del Page
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={e => { e.stopPropagation(); goToPage(-1); }}
+                  disabled={currentPage === 0}
+                  className="w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-[#c8a95a]/30 transition-colors"
+                  style={{ border: '2px solid #8b6914' }}
+                >
+                  <span className="material-symbols-outlined text-[16px] text-[#4a2c0a]">chevron_left</span>
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); goToPage(1); }}
+                  disabled={currentPage === pages.length - 1}
+                  className="w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-[#c8a95a]/30 transition-colors"
+                  style={{ border: '2px solid #8b6914' }}
+                >
+                  <span className="material-symbols-outlined text-[16px] text-[#4a2c0a]">chevron_right</span>
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); addPage(); }}
+                  className="w-7 h-7 flex items-center justify-center hover:bg-[#c8a95a]/30 transition-colors"
+                  style={{ border: '2px solid #8b6914' }}
+                  title="Tambah halaman baru"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-[#4a2c0a]">add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── ACTION BUTTONS (below book) ── */}
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={e => { e.stopPropagation(); handleSave(); }}
+            className="flex-1 py-2 bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn flex items-center justify-center gap-1"
+          >
+            <span className="material-symbols-outlined text-[16px]">save</span>
+            SIMPAN & TUTUP
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); if(window.confirm('Hapus buku ini?')) { onDelete(note.id); onClose(); } }}
+            className="w-10 h-10 bg-error-container text-on-error-container border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn flex items-center justify-center"
+          >
+            <span className="material-symbols-outlined text-[16px]">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // PAGE: STUDY WORKSPACE
 // ============================================================
 function StudyWorkspacePage({
@@ -546,6 +762,7 @@ function StudyWorkspacePage({
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [scratchpadContent, setScratchpadContent] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
+  const [openBook, setOpenBook] = useState(null); // note object currently open in BookModal
 
   // Sticky Notes — persisted to localStorage
   const [stickyNotes, setStickyNotes] = useState(() => {
@@ -1008,74 +1225,148 @@ function StudyWorkspacePage({
             </div>
           </div>
 
-          {/* Notes Section */}
+          {/* ═══ ENCHANTED BOOKSHELF ═══ */}
           <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
-            <div className="flex items-center justify-between mb-step-sm">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-step-md">
               <div className="flex items-center gap-step-xs">
-                <span className="material-symbols-outlined text-primary text-[18px]">description</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface">CATATAN</span>
+                <span className="material-symbols-outlined text-primary text-[20px]">auto_stories</span>
+                <span className="font-headline-sm text-headline-sm text-on-surface">ENCHANTED BOOKSHELF</span>
+                <span className="bg-inverse-surface text-tertiary-fixed-dim font-label-sm text-[10px] px-step-xs py-pixel-unit border border-inverse-surface">
+                  {(noteBlocks || []).length} BUKU
+                </span>
               </div>
-              <button onClick={() => setIsAddingNote(!isAddingNote)} className="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-step-sm py-pixel-unit border border-inverse-surface pixel-btn">
-                {isAddingNote ? 'BATAL' : '+ TAMBAH'}
+              <button
+                onClick={() => {
+                  handleAddNote('Enchanted Book', '');
+                }}
+                className="flex items-center gap-pixel-unit bg-primary-container text-on-primary-container font-label-sm text-label-sm px-step-sm py-pixel-unit border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621] pixel-btn"
+              >
+                <span className="material-symbols-outlined text-[14px]">add</span>
+                BUKU BARU
               </button>
             </div>
-            {isAddingNote && (
-              <div className="flex flex-col gap-step-sm mb-step-sm animate-entrance">
-                <textarea
-                  autoFocus
-                  value={newNoteContent}
-                  onChange={e => setNewNoteContent(e.target.value)}
-                  className="w-full bg-surface-dim border-2 border-inverse-surface p-step-sm font-body-sm text-body-sm text-on-surface resize-none h-24 outline-none focus:border-primary"
-                  placeholder="Tulis catatan..."
-                />
-                <button onClick={handleAddNote} className="w-full py-step-xs bg-primary text-on-primary font-label-md text-label-md font-bold border-2 border-inverse-surface pixel-btn">
-                  SIMPAN
-                </button>
+
+            {/* Shelf rail top */}
+            <div className="h-2 bg-inverse-surface mb-step-sm shadow-[0_3px_0_0_#0d2213]" />
+
+            {/* Book grid */}
+            {(noteBlocks || []).length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-step-xl gap-step-sm text-center">
+                <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-40">auto_stories</span>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada buku catatan.</p>
+                <p className="font-label-sm text-label-sm text-on-surface-variant opacity-60">Klik "+ BUKU BARU" untuk membuat buku pertamamu.</p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-step-sm">
+                {(noteBlocks || []).map((note, idx) => {
+                  // Extract title from content (first line or stored title)
+                  const storedTitle = note.title || '';
+                  const firstLine = note.content ? note.content.split('\n')[0].replace(/===PAGE===/g, '').trim() : '';
+                  const displayTitle = storedTitle || firstLine || `Buku ${idx + 1}`;
+                  const pageCount = note.content ? note.content.split('===PAGE===').length : 1;
+
+                  // Book spine colors rotate
+                  const bookColors = [
+                    { spine: '#5c2a0f', cover: '#7c3d1a', accent: '#c0392b' },
+                    { spine: '#1a3a5c', cover: '#1e4d8c', accent: '#2980b9' },
+                    { spine: '#1a4a1a', cover: '#2d6a2d', accent: '#27ae60' },
+                    { spine: '#4a1a4a', cover: '#7b2d7b', accent: '#9b59b6' },
+                    { spine: '#4a3a0a', cover: '#7c6414', accent: '#f39c12' },
+                  ];
+                  const col = bookColors[idx % bookColors.length];
+
+                  return (
+                    <div
+                      key={note.id}
+                      className="book-card flex flex-col items-center gap-step-xs"
+                      onClick={() => setOpenBook(note)}
+                      title={`Buka: ${displayTitle}`}
+                    >
+                      {/* Book 3D shape */}
+                      <div
+                        className="relative"
+                        style={{
+                          width: 60,
+                          height: 80,
+                          border: `3px solid ${col.spine}`,
+                          boxShadow: `3px 3px 0 0 ${col.spine}`,
+                        }}
+                      >
+                        {/* Cover */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: `linear-gradient(120deg, ${col.cover} 0%, ${col.spine} 100%)`,
+                          }}
+                        />
+                        {/* Spine line */}
+                        <div
+                          className="absolute top-0 bottom-0 left-0"
+                          style={{ width: 8, background: col.spine }}
+                        />
+                        {/* Spiral dots on spine */}
+                        {[20, 34, 48].map(top => (
+                          <div
+                            key={top}
+                            className="absolute"
+                            style={{
+                              top, left: 2,
+                              width: 6, height: 5,
+                              borderRadius: '0 3px 3px 0',
+                              background: col.accent,
+                              border: `1px solid ${col.spine}`,
+                            }}
+                          />
+                        ))}
+                        {/* Page count badge */}
+                        <div
+                          className="absolute bottom-1 right-1 font-label-sm text-[8px] text-white/80 px-[3px]"
+                          style={{ background: 'rgba(0,0,0,0.4)', fontFamily: '"JetBrains Mono", monospace' }}
+                        >
+                          {pageCount}p
+                        </div>
+                        {/* Open indicator on hover */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity" style={{ background: 'rgba(0,0,0,0.35)' }}>
+                          <span className="material-symbols-outlined text-white text-[20px]">menu_book</span>
+                        </div>
+                      </div>
+                      {/* Title under book */}
+                      <span
+                        className="text-center font-label-sm text-[9px] text-on-surface-variant leading-tight max-w-[64px] truncate"
+                        style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                      >
+                        {displayTitle}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
-            <div className="flex flex-col gap-step-sm max-h-48 overflow-y-auto scrollbar-dark">
-              {(noteBlocks || []).map(note => (
-                <div key={note.id} className="p-step-sm bg-surface-dim border border-inverse-surface group">
-                  {editingNoteId === note.id ? (
-                    <div className="flex flex-col gap-step-xs">
-                      <textarea
-                        autoFocus
-                        value={editNoteContent}
-                        onChange={e => setEditNoteContent(e.target.value)}
-                        className="w-full h-16 bg-surface-bright border border-inverse-surface p-step-xs font-body-sm text-[12px] text-on-surface outline-none"
-                      />
-                      <div className="flex gap-step-xs">
-                        <button onClick={() => setEditingNoteId(null)} className="text-[10px] text-on-surface-variant font-label-sm">Batal</button>
-                        <button onClick={() => handleUpdateBlockContent(note.id, editNoteContent)} className="bg-primary text-on-primary text-[10px] font-label-sm font-bold px-step-sm py-pixel-unit border border-inverse-surface pixel-btn">Update</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="font-body-sm text-[12px] text-on-surface whitespace-pre-wrap">{note.content}</p>
-                      <div className="flex justify-end gap-step-xs mt-step-xs pt-step-xs border-t border-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => { setEditingNoteId(note.id); setEditNoteContent(note.content); }} className="text-primary">
-                          <span className="material-symbols-outlined text-[12px]">edit</span>
-                        </button>
-                        <button onClick={() => deleteBlock(note.id)} className="text-error">
-                          <span className="material-symbols-outlined text-[12px]">delete</span>
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-              {(noteBlocks || []).length === 0 && !isAddingNote && (
-                <div className="text-center py-step-md border border-dashed border-outline-variant">
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada catatan.</p>
-                </div>
-              )}
-            </div>
+
+            {/* Shelf rail bottom */}
+            <div className="h-3 bg-inverse-surface mt-step-sm shadow-[0_3px_0_0_#0d2213]" />
+            <div className="h-1 bg-[#3d5c3a] mt-[2px]" />
           </div>
+
+          {/* BookModal — renders into body when a book is open */}
+          {openBook && (
+            <BookModal
+              note={openBook}
+              onClose={() => setOpenBook(null)}
+              onSave={(id, content, title) => {
+                handleUpdateBlockContent(id, content);
+                // Update local openBook title too (reflected on shelf after re-fetch)
+              }}
+              onDelete={(id) => deleteBlock(id)}
+            />
+          )}
         </div>
       </div>
     </div>
   );
 }
+
 
 // ============================================================
 // PAGE: PROFIT ANALYTICS
@@ -1680,14 +1971,22 @@ function App() {
       fetchBlocks(activePageId);
     }
   };
-  const handleAddNote = async () => {
-    if (newNoteContent.trim() !== '' && activePageId) {
-      await supabase.from('blocks').insert([{ page_id: activePageId, type: 'note', content: newNoteContent, is_completed: false }]);
+  const handleAddNote = async (titleParam, contentParam) => {
+    const noteContent = contentParam !== undefined ? contentParam : newNoteContent;
+    if (!activePageId) return; // blocks table requires page_id
+    await supabase.from('blocks').insert([{
+      page_id: activePageId,
+      type: 'note',
+      content: noteContent,
+      is_completed: false
+    }]);
+    if (contentParam === undefined) {
       setNewNoteContent('');
       setIsAddingNote(false);
-      fetchBlocks(activePageId);
     }
+    fetchBlocks(activePageId);
   };
+
   const toggleBlock = async (id, currentStatus) => {
     await supabase.from('blocks').update({ is_completed: !currentStatus }).eq('id', id);
     fetchBlocks(activePageId);

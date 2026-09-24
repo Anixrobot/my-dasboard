@@ -100,3 +100,44 @@ body {
 .scrollbar-dark::-webkit-scrollbar { width: 4px; }
 .scrollbar-dark::-webkit-scrollbar-track { background: #1c3621; }
 .scrollbar-dark::-webkit-scrollbar-thumb { background: #4de082; }
+
+/* ===== BOOK MODAL ===== */
+@keyframes bookOpen {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.book-open { animation: bookOpen 0.22s cubic-bezier(0.34,1.4,0.64,1) forwards; }
+
+@keyframes pageFlip {
+  0%   { opacity: 1; }
+  40%  { opacity: 0.2; transform: translateX(-6px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.page-flip { animation: pageFlip 0.2s ease forwards; }
+
+/* Book paper texture */
+.book-paper {
+  background-color: #f9f3e3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f9f3e3'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23e8d9b8' opacity='0.35'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23dbc89a' opacity='0.25'/%3E%3C/svg%3E");
+}
+
+/* Horizontal ruled lines on page */
+.book-lines {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(139, 90, 43, 0.18) 27px,
+    rgba(139, 90, 43, 0.18) 28px
+  );
+  background-position: 0 36px;
+}
+
+/* Book card hover */
+.book-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.book-card:hover {
+  transform: translateY(-4px) rotate(1deg);
+  box-shadow: 6px 6px 0 0 #1c3621;
+}
