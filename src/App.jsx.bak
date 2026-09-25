@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { supabase } from './supabaseClient';
 import Chart from 'chart.js/auto';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, getYear, getMonth, subDays } from 'date-fns';
@@ -23,7 +23,7 @@ function Sidebar({ activePage, setActivePage }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[4px_0_0_0_#050300] border-r-2 border-inverse-surface">
+    <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[4px_0_0_0_#1c3621] border-r-2 border-inverse-surface">
       <div className="flex flex-col">
         {/* Logo */}
         <div className="h-16 px-step-md flex items-center gap-step-sm bg-surface-container border-b-2 border-inverse-surface">
@@ -36,7 +36,7 @@ function Sidebar({ activePage, setActivePage }) {
 
         {/* XP Bar */}
         <div className="p-step-md">
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[2px_2px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[2px_2px_0_0_#1c3621]">
             <div className="flex items-center justify-between mb-step-xs">
               <div className="flex items-center gap-step-xs">
                 <span className="bg-inverse-surface text-tertiary-fixed-dim px-step-xs py-pixel-unit font-label-sm text-label-sm border border-tertiary-fixed-dim">LVL 18</span>
@@ -44,7 +44,7 @@ function Sidebar({ activePage, setActivePage }) {
               </div>
               <span className="font-label-sm text-label-sm text-on-surface-variant">8.420 / 10k XP</span>
             </div>
-            <div className="h-3 w-full bg-surface-dim border-2 border-inverse-surface p-[1px] shadow-[inset_1px_1px_0_0_#050300]">
+            <div className="h-3 w-full bg-surface-dim border-2 border-inverse-surface p-[1px] shadow-[inset_1px_1px_0_0_#1c3621]">
               <div className="h-full bg-primary-container mana-glow transition-all" style={{ width: '84%' }}></div>
             </div>
           </div>
@@ -58,7 +58,7 @@ function Sidebar({ activePage, setActivePage }) {
               onClick={() => setActivePage(item.id)}
               className={`flex items-center gap-step-sm px-step-md py-step-sm rounded transition-all text-left w-full ${
                 activePage === item.id
-                  ? 'bg-primary-container text-on-primary-container font-bold border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300]'
+                  ? 'bg-primary-container text-on-primary-container font-bold border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621]'
                   : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
               }`}
             >
@@ -95,16 +95,16 @@ function Sidebar({ activePage, setActivePage }) {
 // ============================================================
 function Header({ formatIDR, tabunganBalance, gtNetDL, isSyncing, handleSyncData }) {
   return (
-    <header className="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 border-b-2 border-inverse-surface shadow-[0_2px_0_0_#050300]">
+    <header className="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 border-b-2 border-inverse-surface shadow-[0_2px_0_0_#1c3621]">
       <div className="h-16 w-full px-step-lg flex items-center justify-between">
         <div className="flex items-center gap-step-md">
           {/* Streak badge */}
-          <div className="flex items-center gap-step-xs px-step-sm py-pixel-unit bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300]">
+          <div className="flex items-center gap-step-xs px-step-sm py-pixel-unit bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621]">
             <span className="material-symbols-outlined text-primary text-[18px]">local_fire_department</span>
             <span className="font-label-md text-label-md text-on-surface">24 DAY STREAK</span>
           </div>
           {/* Wallet summary */}
-          <div className="hidden md:flex items-center gap-step-sm px-step-md py-pixel-unit bg-surface-container border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300]">
+          <div className="hidden md:flex items-center gap-step-sm px-step-md py-pixel-unit bg-surface-container border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621]">
             <div className="flex items-center gap-step-xs font-label-md text-label-md text-on-surface">
               <span className="material-symbols-outlined text-primary text-[16px]">payments</span>
               <span>{formatIDR ? formatIDR(tabunganBalance) : 'Rp 0'}</span>
@@ -121,12 +121,12 @@ function Header({ formatIDR, tabunganBalance, gtNetDL, isSyncing, handleSyncData
           <button
             onClick={handleSyncData}
             disabled={isSyncing}
-            className="h-9 w-9 bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300] flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors pixel-btn"
+            className="h-9 w-9 bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621] flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors pixel-btn"
             title="Sync Data"
           >
             <span className={`material-symbols-outlined text-[18px] ${isSyncing ? 'animate-spin' : ''}`}>sync</span>
           </button>
-          <button className="h-9 w-9 bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300] flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors pixel-btn">
+          <button className="h-9 w-9 bg-surface-container-high border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621] flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors pixel-btn">
             <span className="material-symbols-outlined text-[18px]">notifications</span>
           </button>
           <div className="flex items-center gap-step-sm">
@@ -176,7 +176,7 @@ function CommandCenterPage({
   return (
     <div className="flex flex-col w-full animate-entrance">
       {/* HERO BANNER */}
-      <section className="relative w-full overflow-hidden bg-surface-container-high shadow-[0_4px_0_0_#050300]">
+      <section className="relative w-full overflow-hidden bg-surface-container-high shadow-[0_4px_0_0_#1c3621]">
         <div
           className="absolute inset-0 opacity-20 mix-blend-multiply bg-cover bg-center pointer-events-none retro-scanlines"
           style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNKnPuqlgFgaYIGTjVtIGKJBTKuZAnQNXyIiJmf34JK2HxEOKipreBnj9yVCBff3Stng6j8H8bBtMzpw1bRKwRQBgOsDEqnMjHOAHJhubakf7uQy43i-Getcs3N0ZImYxe7gFWCjxWc4A4Jv9bgrqq9SifmTLuaYLTKnqwIPg_BhWlINZvHZG61hn_mJ8beXwYXqo1RaQEJGN66LS5rKiepd2Uj8KKLPdCT_PXlmtbQIaeXt5w46t0')" }}
@@ -184,10 +184,10 @@ function CommandCenterPage({
         <div className="relative z-10 px-step-lg py-step-lg flex flex-col xl:flex-row xl:items-center xl:justify-between gap-step-md">
           <div>
             <div className="flex items-center gap-step-sm mb-step-xs flex-wrap">
-              <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#050300]">
+              <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#1c3621]">
                 QUESTFOLIO // REALM VAULT
               </span>
-              <span className="inline-flex items-center gap-pixel-unit bg-primary-container text-on-primary-container px-step-sm py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#050300]">
+              <span className="inline-flex items-center gap-pixel-unit bg-primary-container text-on-primary-container px-step-sm py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#1c3621]">
                 <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                 ACTIVE BUFF +25% XP
               </span>
@@ -200,19 +200,19 @@ function CommandCenterPage({
 
           {/* Quick Stats */}
           <div className="flex flex-wrap gap-step-sm">
-            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex flex-col gap-pixel-unit min-w-[120px]">
+            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-pixel-unit min-w-[120px]">
               <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Net Worth</span>
               <span className={`font-headline-sm text-headline-sm font-bold ${totalKekayaanIDR >= 0 ? 'text-primary' : 'text-error'}`}>
                 {formatIDR(totalKekayaanIDR)}
               </span>
             </div>
-            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex flex-col gap-pixel-unit min-w-[120px]">
+            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-pixel-unit min-w-[120px]">
               <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Aset GT</span>
               <span className={`font-headline-sm text-headline-sm font-bold ${isGtProfit ? 'text-primary' : 'text-error'}`}>
                 {isGtProfit ? '+' : ''}{gtNetDL.toFixed(2)} DL
               </span>
             </div>
-            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex flex-col gap-pixel-unit min-w-[120px]">
+            <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-pixel-unit min-w-[120px]">
               <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">Quest Selesai</span>
               <span className="font-headline-sm text-headline-sm font-bold text-tertiary">
                 {completedTodayTasks.length} / {totalTodayTasks.length}
@@ -228,7 +228,7 @@ function CommandCenterPage({
         {/* LEFT: Finance Summary */}
         <div className="lg:col-span-4 flex flex-col gap-step-md">
           {/* Finance Header */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex items-center justify-between">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex items-center justify-between">
             <div className="flex items-center gap-step-xs">
               <span className="material-symbols-outlined text-primary text-[20px]">account_balance_wallet</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">DOMPET KU</span>
@@ -236,13 +236,13 @@ function CommandCenterPage({
             <div className="flex gap-step-xs">
               <button
                 onClick={() => { setIsAddingTx(!isAddingTx); setIsTransferring(false); }}
-                className={`px-step-sm py-pixel-unit font-label-sm text-label-sm border border-inverse-surface shadow-[2px_2px_0_0_#050300] pixel-btn transition-colors ${isAddingTx ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'}`}
+                className={`px-step-sm py-pixel-unit font-label-sm text-label-sm border border-inverse-surface shadow-[2px_2px_0_0_#1c3621] pixel-btn transition-colors ${isAddingTx ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container'}`}
               >
                 {isAddingTx ? 'BATAL' : '+ KAS'}
               </button>
               <button
                 onClick={() => { setIsTransferring(!isTransferring); setIsAddingTx(false); }}
-                className={`px-step-sm py-pixel-unit font-label-sm text-label-sm border border-inverse-surface shadow-[2px_2px_0_0_#050300] pixel-btn transition-colors ${isTransferring ? 'bg-error text-on-error' : 'bg-surface-container-high text-on-surface'}`}
+                className={`px-step-sm py-pixel-unit font-label-sm text-label-sm border border-inverse-surface shadow-[2px_2px_0_0_#1c3621] pixel-btn transition-colors ${isTransferring ? 'bg-error text-on-error' : 'bg-surface-container-high text-on-surface'}`}
               >
                 ⇄ ASET
               </button>
@@ -250,7 +250,7 @@ function CommandCenterPage({
           </div>
 
           {/* DL Rate */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[2px_2px_0_0_#050300] flex items-center gap-step-sm">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[2px_2px_0_0_#1c3621] flex items-center gap-step-sm">
             <span className="font-label-sm text-label-sm text-on-surface-variant">KURS 1 DL:</span>
             <span className="font-label-sm text-label-sm text-primary font-bold">Rp</span>
             <input
@@ -263,7 +263,7 @@ function CommandCenterPage({
           </div>
 
           {/* Balance Cards */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="font-label-sm text-label-sm text-on-surface-variant mb-step-xs uppercase">Tabungan IDR</div>
             <div className={`font-headline-md text-headline-md font-bold ${tabunganBalance >= 0 ? 'text-primary' : 'text-error'}`}>
               {formatIDR(tabunganBalance)}
@@ -274,7 +274,7 @@ function CommandCenterPage({
             </div>
           </div>
 
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="font-label-sm text-label-sm text-on-surface-variant mb-step-xs uppercase">Aset Game (GT)</div>
             <div className={`font-headline-md text-headline-md font-bold ${isGtProfit ? 'text-primary' : 'text-error'}`}>
               {isGtProfit ? '+' : ''}{gtNetDL.toFixed(2)} DL
@@ -284,7 +284,7 @@ function CommandCenterPage({
 
           {/* Add Transaction Form */}
           {isAddingTx && (
-            <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#050300] flex flex-col gap-step-sm animate-entrance">
+            <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-step-sm animate-entrance">
               <div className="flex bg-surface-dim border border-inverse-surface p-pixel-unit">
                 <button onClick={() => handleTxCategoryToggle('TABUNGAN')} className={`flex-1 py-step-xs font-label-sm text-label-sm font-bold ${txCategory === 'TABUNGAN' ? 'bg-inverse-surface text-tertiary-fixed-dim' : 'text-on-surface-variant'}`}>BANK</button>
                 <button onClick={() => handleTxCategoryToggle('GT')} className={`flex-1 py-step-xs font-label-sm text-label-sm font-bold ${txCategory === 'GT' ? 'bg-inverse-surface text-tertiary-fixed-dim' : 'text-on-surface-variant'}`}>ASET GT</button>
@@ -308,7 +308,7 @@ function CommandCenterPage({
                   </select>
                 )}
               </div>
-              <button onClick={handleAddTransaction} className="w-full py-step-sm bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn">
+              <button onClick={handleAddTransaction} className="w-full py-step-sm bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn">
                 CATAT TRANSAKSI
               </button>
             </div>
@@ -316,7 +316,7 @@ function CommandCenterPage({
 
           {/* Transfer Form */}
           {isTransferring && (
-            <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#050300] flex flex-col gap-step-sm animate-entrance">
+            <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-step-sm animate-entrance">
               <div className="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold">Konversi Aset IDR ⇄ GT</div>
               <select value={transferDirection} onChange={e => setTransferDirection(e.target.value)} className="bg-surface-dim border border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none">
                 <option value="TABUNGAN_TO_GT">Beli Aset GT (Rp → DL)</option>
@@ -325,14 +325,14 @@ function CommandCenterPage({
               <input type="date" value={transferDate} onChange={e => setTransferDate(e.target.value)} className="bg-surface-dim border border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
               <input type="number" value={transferAmountIDR} onChange={e => setTransferAmountIDR(e.target.value)} placeholder="Nominal Rp..." className="bg-surface-dim border border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
               <input type="text" value={transferDesc} onChange={e => setTransferDesc(e.target.value)} placeholder="Keterangan..." className="bg-surface-dim border border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
-              <button onClick={handleTransferAction} className="w-full py-step-sm bg-tertiary-container text-on-tertiary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn">
+              <button onClick={handleTransferAction} className="w-full py-step-sm bg-tertiary-container text-on-tertiary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn">
                 EKSEKUSI KONVERSI
               </button>
             </div>
           )}
 
           {/* Recent Transactions */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col gap-step-sm">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621] flex flex-col gap-step-sm">
             <div className="flex items-center gap-step-xs mb-step-xs">
               <span className="material-symbols-outlined text-primary text-[18px]">history</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">TRANSAKSI TERBARU</span>
@@ -366,7 +366,7 @@ function CommandCenterPage({
         {/* CENTER: Quest Log & Calendar */}
         <div className="lg:col-span-5 flex flex-col gap-step-md">
           {/* Calendar */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center justify-between mb-step-sm">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
@@ -386,7 +386,7 @@ function CommandCenterPage({
           </div>
 
           {/* Daily Quest Log */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621] flex flex-col flex-1">
             <div className="flex items-center justify-between mb-step-md">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">format_list_bulleted</span>
@@ -397,7 +397,7 @@ function CommandCenterPage({
 
             <div className="flex flex-col gap-step-sm flex-1">
               {(dailyTasks || []).map(task => (
-                <div key={task.id} className={`flex items-start gap-step-sm p-step-sm border-2 border-inverse-surface group hover:bg-surface-container-high transition-colors ${task.is_completed ? 'bg-surface-container-low opacity-75' : 'bg-surface-bright shadow-[2px_2px_0_0_#5C3A10]'}`}>
+                <div key={task.id} className={`flex items-start gap-step-sm p-step-sm border-2 border-inverse-surface group hover:bg-surface-container-high transition-colors ${task.is_completed ? 'bg-surface-container-low opacity-75' : 'bg-surface-bright shadow-[2px_2px_0_0_#10b981]'}`}>
                   <div className="mt-0.5 cursor-pointer" onClick={() => toggleDailyTask(task.id, task.is_completed)}>
                     {task.is_completed ? (
                       <span className="w-5 h-5 bg-primary border border-inverse-surface flex items-center justify-center text-on-primary">
@@ -425,7 +425,7 @@ function CommandCenterPage({
               onChange={e => setNewDailyTaskName(e.target.value)}
               onKeyDown={handleAddDailyTask}
               placeholder="+ Tambah quest baru... (Enter)"
-              className="mt-step-md w-full py-step-sm px-step-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-2 border-inverse-surface font-label-md text-label-md shadow-[3px_3px_0_0_#050300] outline-none focus:border-primary"
+              className="mt-step-md w-full py-step-sm px-step-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-2 border-inverse-surface font-label-md text-label-md shadow-[3px_3px_0_0_#1c3621] outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -433,7 +433,7 @@ function CommandCenterPage({
         {/* RIGHT: Activity Log & Memos */}
         <div className="lg:col-span-3 flex flex-col gap-step-md">
           {/* Net Worth Highlight */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] relative overflow-hidden">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621] relative overflow-hidden">
             <div className="absolute -right-8 -bottom-8 opacity-10">
               <span className="material-symbols-outlined text-[120px] text-primary">account_balance</span>
             </div>
@@ -448,7 +448,7 @@ function CommandCenterPage({
           </div>
 
           {/* Quick Activity */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center gap-step-xs mb-step-md">
               <span className="material-symbols-outlined text-primary text-[18px]">history</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">AKTIVITAS</span>
@@ -470,18 +470,18 @@ function CommandCenterPage({
           </div>
 
           {/* Sticky Notes */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center gap-step-xs mb-step-sm">
               <span className="material-symbols-outlined text-primary text-[18px]">push_pin</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">MEMO CEPAT</span>
             </div>
             <div className="grid grid-cols-2 gap-step-sm">
-              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[-1deg]">
+              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1deg]">
                 <div className="font-label-sm text-[10px] font-bold mb-1 border-b border-[#ca8a04]/40 pb-pixel-unit">TARGET IPK</div>
                 <p className="font-headline-sm text-[15px] font-bold">IPK &gt; 3.80!</p>
                 <p className="font-body-sm text-[10px] text-[#92400e] mt-pixel-unit">Zero procrastination!</p>
               </div>
-              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[1.5deg]">
+              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1.5deg]">
                 <div className="font-label-sm text-[10px] font-bold mb-1 border-b border-[#16a34a]/40 pb-pixel-unit">GT RATE</div>
                 <p className="font-body-sm text-[11px] leading-tight">Rate DL: Rp {Number(dlRate).toLocaleString('id-ID')}</p>
                 <p className="font-label-sm text-[10px] text-[#166534] mt-pixel-unit">Update berkala</p>
@@ -490,7 +490,7 @@ function CommandCenterPage({
           </div>
 
           {/* Progress Stats */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center gap-step-xs mb-step-md">
               <span className="material-symbols-outlined text-primary text-[18px]">military_tech</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">PROGRES QUEST</span>
@@ -721,14 +721,14 @@ function BookModal({ note, onClose, onSave, onDelete }) {
         <div className="flex gap-2 mt-3">
           <button
             onClick={e => { e.stopPropagation(); handleSave(); }}
-            className="flex-1 py-2 bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn flex items-center justify-center gap-1"
+            className="flex-1 py-2 bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn flex items-center justify-center gap-1"
           >
             <span className="material-symbols-outlined text-[16px]">save</span>
             SIMPAN & TUTUP
           </button>
           <button
             onClick={e => { e.stopPropagation(); if(window.confirm('Hapus buku ini?')) { onDelete(note.id); onClose(); } }}
-            className="w-10 h-10 bg-error-container text-on-error-container border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn flex items-center justify-center"
+            className="w-10 h-10 bg-error-container text-on-error-container border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn flex items-center justify-center"
           >
             <span className="material-symbols-outlined text-[16px]">delete</span>
           </button>
@@ -832,7 +832,7 @@ function StudyWorkspacePage({
   return (
     <div className="flex flex-col w-full animate-entrance">
       {/* TOP BANNER */}
-      <div className="relative w-full overflow-hidden bg-surface-container-high px-step-lg py-step-lg shadow-[4px_4px_0_0_#050300]">
+      <div className="relative w-full overflow-hidden bg-surface-container-high px-step-lg py-step-lg shadow-[4px_4px_0_0_#1c3621]">
         <div
           className="absolute inset-0 opacity-20 mix-blend-multiply bg-cover bg-center pointer-events-none retro-scanlines"
           style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDp1O9Uzwv6FyoWIJghTKDmwjH8QZ0xfVzQimAagTUTVrbavXoW4OHMEHgrtlmZZ_HbjA_6YCBGDEgBHbMPRZ5hAgPyC4_8MA2shG0zw2GFMZjNUN6HH8jdzjaRpAlQ5gGFIIqhkT0vHWwdopjt7m52FU6lVubUrXDU32Xe5hAnZakrtWNInOiAdZm3RldmKGmOG2d11lhpcqOMLQSkxBCazsCkda92Ha9I9jLG9kuj4OECeIc5-Jec')" }}
@@ -840,10 +840,10 @@ function StudyWorkspacePage({
         <div className="relative z-10 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-step-md">
           <div>
             <div className="flex items-center gap-step-sm mb-step-xs flex-wrap">
-              <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#050300]">
+              <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#1c3621]">
                 DUNGEON GUILD ARCHIVE // STUDY SECTOR
               </span>
-              <span className="inline-flex items-center gap-pixel-unit bg-primary-container text-on-primary-container px-step-sm py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#050300]">
+              <span className="inline-flex items-center gap-pixel-unit bg-primary-container text-on-primary-container px-step-sm py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#1c3621]">
                 <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                 ACTIVE BUFF +25% XP
               </span>
@@ -855,9 +855,9 @@ function StudyWorkspacePage({
           </div>
 
           {/* Pomodoro Timer */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[4px_4px_0_0_#050300] flex flex-col sm:flex-row items-stretch sm:items-center gap-step-md">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[4px_4px_0_0_#1c3621] flex flex-col sm:flex-row items-stretch sm:items-center gap-step-md">
             <div className="flex items-center gap-step-sm">
-              <div className="w-12 h-12 bg-inverse-surface flex items-center justify-center text-tertiary-fixed-dim shadow-[inset_2px_2px_0_0_#050300]">
+              <div className="w-12 h-12 bg-inverse-surface flex items-center justify-center text-tertiary-fixed-dim shadow-[inset_2px_2px_0_0_#00210c]">
                 <span className="material-symbols-outlined text-[28px]">hourglass_top</span>
               </div>
               <div>
@@ -867,7 +867,7 @@ function StudyWorkspacePage({
             </div>
             <button
               onClick={toggleTimer}
-              className={`px-step-md py-step-xs font-label-md text-label-md border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn flex items-center gap-pixel-unit ${isTimerRunning ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'}`}
+              className={`px-step-md py-step-xs font-label-md text-label-md border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn flex items-center gap-pixel-unit ${isTimerRunning ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'}`}
             >
               <span className="material-symbols-outlined text-[16px]">bolt</span>
               <span>{isTimerRunning ? 'DISPEL (PAUSE)' : 'CAST FOCUS'}</span>
@@ -882,7 +882,7 @@ function StudyWorkspacePage({
         {/* LEFT: Checklist / Targets */}
         <div className="lg:col-span-3 flex flex-col gap-step-md">
           {/* Section Header */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex items-center justify-between">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex items-center justify-between">
             <div className="flex items-center gap-step-xs">
               <span className="material-symbols-outlined text-primary text-[20px]">account_tree</span>
               <span className="font-headline-sm text-headline-sm text-on-surface">TARGET LISTS</span>
@@ -922,7 +922,7 @@ function StudyWorkspacePage({
             const completed = groupBlocks.filter(b => b.is_completed).length;
             const pct = groupBlocks.length === 0 ? 0 : Math.round((completed / groupBlocks.length) * 100);
             return (
-              <div key={groupType} className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+              <div key={groupType} className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
                 <div className="flex items-start justify-between mb-step-xs">
                   <div>
                     <input
@@ -991,7 +991,7 @@ function StudyWorkspacePage({
           })}
 
           {/* Familiar advice */}
-          <div className="bg-surface-dim border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex items-center gap-step-sm">
+          <div className="bg-surface-dim border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#1c3621] flex items-center gap-step-sm">
             <div className="w-10 h-10 bg-inverse-surface text-tertiary-fixed-dim flex items-center justify-center shrink-0 border border-inverse-surface">
               <span className="material-symbols-outlined text-[20px]">smart_toy</span>
             </div>
@@ -1007,7 +1007,7 @@ function StudyWorkspacePage({
         {/* CENTER: Calendar + Quest Timeline */}
         <div className="lg:col-span-5 flex flex-col gap-step-md">
           {/* Calendar */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center justify-between mb-step-sm">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
@@ -1059,7 +1059,7 @@ function StudyWorkspacePage({
           </div>
 
           {/* Daily Quest Log */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621] flex flex-col flex-1">
             <div className="flex items-center justify-between mb-step-md">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">format_list_bulleted</span>
@@ -1070,7 +1070,7 @@ function StudyWorkspacePage({
 
             <div className="flex flex-col gap-step-sm flex-1">
               {(dailyTasks || []).map(task => (
-                <div key={task.id} className={`flex items-start gap-step-sm p-step-sm border-2 border-inverse-surface group transition-colors ${task.is_completed ? 'bg-surface-container-low opacity-75' : 'bg-surface-bright shadow-[4px_4px_0_0_#5C3A10]'}`}>
+                <div key={task.id} className={`flex items-start gap-step-sm p-step-sm border-2 border-inverse-surface group transition-colors ${task.is_completed ? 'bg-surface-container-low opacity-75' : 'bg-surface-bright shadow-[4px_4px_0_0_#10b981]'}`}>
                   <div className="mt-0.5 cursor-pointer" onClick={() => toggleDailyTask(task.id, task.is_completed)}>
                     {task.is_completed ? (
                       <span className="w-5 h-5 bg-primary border border-inverse-surface flex items-center justify-center text-on-primary">
@@ -1100,7 +1100,7 @@ function StudyWorkspacePage({
               onChange={e => setNewDailyTaskName(e.target.value)}
               onKeyDown={handleAddDailyTask}
               placeholder="+ Tambah quest baru... (Enter)"
-              className="mt-step-md w-full py-step-sm px-step-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-2 border-inverse-surface font-label-md text-label-md shadow-[3px_3px_0_0_#050300] outline-none focus:border-primary"
+              className="mt-step-md w-full py-step-sm px-step-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-2 border-inverse-surface font-label-md text-label-md shadow-[3px_3px_0_0_#1c3621] outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -1108,7 +1108,7 @@ function StudyWorkspacePage({
         {/* RIGHT: Pinboard + Scratchpad */}
         <div className="lg:col-span-4 flex flex-col gap-step-md">
           {/* Guild Pinboard */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             <div className="flex items-center justify-between mb-step-sm">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">push_pin</span>
@@ -1117,7 +1117,7 @@ function StudyWorkspacePage({
             </div>
             <div className="grid grid-cols-2 gap-step-sm">
               {/* NOTE 1 — Kuning */}
-              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[-1deg] flex flex-col">
+              <div className="bg-[#fef9c3] text-[#422006] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#ca8a04]/40 pb-pixel-unit mb-step-xs">
                   <input
                     type="text"
@@ -1136,7 +1136,7 @@ function StudyWorkspacePage({
                 />
               </div>
               {/* NOTE 2 — Hijau */}
-              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[1.5deg] flex flex-col">
+              <div className="bg-[#dcfce7] text-[#14532d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1.5deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#16a34a]/40 pb-pixel-unit mb-step-xs">
                   <input
                     type="text"
@@ -1155,7 +1155,7 @@ function StudyWorkspacePage({
                 />
               </div>
               {/* NOTE 3 — Biru/Ungu */}
-              <div className="bg-[#e0e7ff] text-[#1e1b4b] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[-1.5deg] flex flex-col">
+              <div className="bg-[#e0e7ff] text-[#1e1b4b] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[-1.5deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#4f46e5]/40 pb-pixel-unit mb-step-xs">
                   <input
                     type="text"
@@ -1174,7 +1174,7 @@ function StudyWorkspacePage({
                 />
               </div>
               {/* NOTE 4 — Merah */}
-              <div className="bg-[#fee2e2] text-[#7f1d1d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] sticky-note rotate-[1deg] flex flex-col">
+              <div className="bg-[#fee2e2] text-[#7f1d1d] p-step-sm border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] sticky-note rotate-[1deg] flex flex-col">
                 <div className="flex items-center justify-between border-b border-[#dc2626]/40 pb-pixel-unit mb-step-xs">
                   <input
                     type="text"
@@ -1196,7 +1196,7 @@ function StudyWorkspacePage({
           </div>
 
           {/* Scratchpad */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621] flex flex-col flex-1">
             <div className="flex items-center justify-between mb-step-xs">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">history_edu</span>
@@ -1204,7 +1204,7 @@ function StudyWorkspacePage({
               </div>
               <span className="font-label-sm text-[10px] bg-inverse-surface text-tertiary-fixed-dim px-step-xs py-pixel-unit">MARKDOWN</span>
             </div>
-            <div className="flex-1 bg-inverse-surface border-2 border-inverse-surface p-step-sm shadow-[inset_2px_2px_0_0_#050300] text-surface-bright flex flex-col">
+            <div className="flex-1 bg-inverse-surface border-2 border-inverse-surface p-step-sm shadow-[inset_2px_2px_0_0_#00210c] text-surface-bright flex flex-col">
               <div className="flex items-center justify-between pb-step-xs border-b border-surface-variant/20 mb-step-xs font-label-sm text-[11px] text-tertiary-fixed-dim">
                 <span>// scratchpad.md</span>
                 <span className="text-[10px] text-outline-variant">UTF-8</span>
@@ -1218,7 +1218,7 @@ function StudyWorkspacePage({
             </div>
             <div className="mt-step-sm flex items-center justify-between">
               <span className="font-label-sm text-label-sm text-on-surface-variant">{saveStatus}</span>
-              <button onClick={saveNotes} className="bg-primary-container hover:bg-tertiary-fixed-dim text-on-primary-container font-label-sm text-label-sm font-bold px-step-md py-step-xs border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300] pixel-btn flex items-center gap-pixel-unit">
+              <button onClick={saveNotes} className="bg-primary-container hover:bg-tertiary-fixed-dim text-on-primary-container font-label-sm text-label-sm font-bold px-step-md py-step-xs border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621] pixel-btn flex items-center gap-pixel-unit">
                 <span className="material-symbols-outlined text-[15px]">save</span>
                 <span>SAVE SCROLL</span>
               </button>
@@ -1226,7 +1226,7 @@ function StudyWorkspacePage({
           </div>
 
           {/* ═══ ENCHANTED BOOKSHELF ═══ */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#1c3621]">
             {/* Header */}
             <div className="flex items-center justify-between mb-step-md">
               <div className="flex items-center gap-step-xs">
@@ -1240,7 +1240,7 @@ function StudyWorkspacePage({
                 onClick={() => {
                   handleAddNote('Enchanted Book', '');
                 }}
-                className="flex items-center gap-pixel-unit bg-primary-container text-on-primary-container font-label-sm text-label-sm px-step-sm py-pixel-unit border-2 border-inverse-surface shadow-[2px_2px_0_0_#050300] pixel-btn"
+                className="flex items-center gap-pixel-unit bg-primary-container text-on-primary-container font-label-sm text-label-sm px-step-sm py-pixel-unit border-2 border-inverse-surface shadow-[2px_2px_0_0_#1c3621] pixel-btn"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
                 BUKU BARU
@@ -1248,7 +1248,7 @@ function StudyWorkspacePage({
             </div>
 
             {/* Shelf rail top */}
-            <div className="h-2 bg-inverse-surface mb-step-sm shadow-[0_3px_0_0_#050300]" />
+            <div className="h-2 bg-inverse-surface mb-step-sm shadow-[0_3px_0_0_#0d2213]" />
 
             {/* Book grid */}
             {(noteBlocks || []).length === 0 ? (
@@ -1345,8 +1345,8 @@ function StudyWorkspacePage({
             )}
 
             {/* Shelf rail bottom */}
-            <div className="h-3 bg-inverse-surface mt-step-sm shadow-[0_3px_0_0_#050300]" />
-            <div className="h-1 bg-[#1A0E06] mt-[2px]" />
+            <div className="h-3 bg-inverse-surface mt-step-sm shadow-[0_3px_0_0_#0d2213]" />
+            <div className="h-1 bg-[#3d5c3a] mt-[2px]" />
           </div>
 
           {/* BookModal — renders into body when a book is open */}
@@ -1403,11 +1403,11 @@ function ProfitAnalyticsPage({
   return (
     <div className="flex flex-col w-full animate-entrance">
       {/* HEADER */}
-      <div className="relative bg-surface-container-low px-step-lg py-step-lg shadow-[4px_4px_0_0_#050300]">
+      <div className="relative bg-surface-container-low px-step-lg py-step-lg shadow-[4px_4px_0_0_#1c3621]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-step-md">
           <div>
             <div className="flex items-center gap-step-xs flex-wrap mb-step-xs">
-              <span className="inline-flex items-center gap-1 bg-inverse-surface text-tertiary-fixed-dim px-step-xs py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#1E0E02]">
+              <span className="inline-flex items-center gap-1 bg-inverse-surface text-tertiary-fixed-dim px-step-xs py-pixel-unit font-label-sm text-label-sm shadow-[2px_2px_0_0_#06200d]">
                 <span className="material-symbols-outlined text-[14px]">shield</span>
                 FINANCE GUILD — LEDGER SYNCED
               </span>
@@ -1424,11 +1424,11 @@ function ProfitAnalyticsPage({
               ))}
             </div>
             <div className="flex items-center gap-step-xs">
-              <button onClick={() => { setIsAddingTx(!isAddingTx); setIsTransferring(false); }} className={`inline-flex items-center gap-step-xs px-step-md py-step-sm font-label-md text-label-md shadow-[3px_3px_0_0_#050300] pixel-btn ${isAddingTx ? 'bg-error text-on-error' : 'bg-surface-container text-on-surface border-2 border-inverse-surface'}`}>
+              <button onClick={() => { setIsAddingTx(!isAddingTx); setIsTransferring(false); }} className={`inline-flex items-center gap-step-xs px-step-md py-step-sm font-label-md text-label-md shadow-[3px_3px_0_0_#1c3621] pixel-btn ${isAddingTx ? 'bg-error text-on-error' : 'bg-surface-container text-on-surface border-2 border-inverse-surface'}`}>
                 <span className="material-symbols-outlined text-[18px]">add_box</span>
                 <span>{isAddingTx ? 'Batal' : '+ Trade Baru'}</span>
               </button>
-              <button onClick={() => { setIsTransferring(!isTransferring); setIsAddingTx(false); }} className={`inline-flex items-center gap-step-xs px-step-md py-step-sm font-label-md text-label-md shadow-[3px_3px_0_0_#050300] pixel-btn ${isTransferring ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container border-2 border-inverse-surface'}`}>
+              <button onClick={() => { setIsTransferring(!isTransferring); setIsAddingTx(false); }} className={`inline-flex items-center gap-step-xs px-step-md py-step-sm font-label-md text-label-md shadow-[3px_3px_0_0_#1c3621] pixel-btn ${isTransferring ? 'bg-error text-on-error' : 'bg-primary-container text-on-primary-container border-2 border-inverse-surface'}`}>
                 <span>⇄ Konversi</span>
               </button>
             </div>
@@ -1439,7 +1439,7 @@ function ProfitAnalyticsPage({
       <div className="relative w-full px-step-md sm:px-step-lg py-step-lg flex flex-col gap-step-lg">
         {/* Forms */}
         {isAddingTx && (
-          <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#050300] flex flex-col gap-step-sm animate-entrance">
+          <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#1c3621] flex flex-col gap-step-sm animate-entrance">
             <div className="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase mb-step-xs">Catat Transaksi Baru</div>
             <div className="flex bg-surface-dim border border-inverse-surface p-pixel-unit w-fit">
               <button onClick={() => handleTxCategoryToggle('TABUNGAN')} className={`px-step-md py-step-xs font-label-sm text-label-sm font-bold ${txCategory === 'TABUNGAN' ? 'bg-inverse-surface text-tertiary-fixed-dim' : 'text-on-surface-variant'}`}>BANK</button>
@@ -1465,7 +1465,7 @@ function ProfitAnalyticsPage({
                   </select>
                 )}
               </div>
-              <button onClick={handleAddTransaction} className="px-step-lg py-step-sm bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn">
+              <button onClick={handleAddTransaction} className="px-step-lg py-step-sm bg-primary-container text-on-primary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn">
                 CATAT
               </button>
             </div>
@@ -1473,7 +1473,7 @@ function ProfitAnalyticsPage({
         )}
 
         {isTransferring && (
-          <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#050300] flex flex-wrap gap-step-sm items-end animate-entrance">
+          <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md shadow-[3px_3px_0_0_#1c3621] flex flex-wrap gap-step-sm items-end animate-entrance">
             <div className="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase w-full">Konversi Aset IDR ⇄ GT</div>
             <select value={transferDirection} onChange={e => setTransferDirection(e.target.value)} className="bg-surface-dim border-2 border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none">
               <option value="TABUNGAN_TO_GT">Beli Aset GT (Rp → DL)</option>
@@ -1482,7 +1482,7 @@ function ProfitAnalyticsPage({
             <input type="date" value={transferDate} onChange={e => setTransferDate(e.target.value)} className="bg-surface-dim border-2 border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
             <input type="number" value={transferAmountIDR} onChange={e => setTransferAmountIDR(e.target.value)} placeholder="Nominal Rp..." className="w-36 bg-surface-dim border-2 border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
             <input type="text" value={transferDesc} onChange={e => setTransferDesc(e.target.value)} placeholder="Keterangan..." className="flex-1 bg-surface-dim border-2 border-inverse-surface px-step-sm py-step-xs font-label-sm text-label-sm text-on-surface outline-none" />
-            <button onClick={handleTransferAction} className="px-step-lg py-step-sm bg-tertiary-container text-on-tertiary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300] pixel-btn">EKSEKUSI</button>
+            <button onClick={handleTransferAction} className="px-step-lg py-step-sm bg-tertiary-container text-on-tertiary-container font-label-md text-label-md font-bold border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621] pixel-btn">EKSEKUSI</button>
           </div>
         )}
 
@@ -1495,7 +1495,7 @@ function ProfitAnalyticsPage({
             { label: 'Win Rate', value: `${winRate}%`, color: 'text-on-surface', icon: 'verified', sub: `${wins} Wins / ${losses} Losses` },
             { label: 'ROI', value: `${roi}%`, color: parseFloat(roi) >= 0 ? 'text-primary' : 'text-error', icon: 'percent', sub: `Modal: ${gtModalDL.toFixed(2)} DL` },
           ].map((card, i) => (
-            <div key={i} className={`bg-surface-container-low p-step-md flex flex-col justify-between shadow-[4px_4px_0_0_#050300] hover:-translate-y-0.5 transition-transform ${card.highlight ? 'ring-2 ring-primary-container' : ''} border-2 border-inverse-surface`}>
+            <div key={i} className={`bg-surface-container-low p-step-md flex flex-col justify-between shadow-[4px_4px_0_0_#1c3621] hover:-translate-y-0.5 transition-transform ${card.highlight ? 'ring-2 ring-primary-container' : ''} border-2 border-inverse-surface`}>
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">{card.label}</span>
                 <span className="material-symbols-outlined text-primary text-[20px]">{card.icon}</span>
@@ -1509,7 +1509,7 @@ function ProfitAnalyticsPage({
         </div>
 
         {/* CHART */}
-        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300]">
+        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#1c3621]">
           <div className="flex items-center justify-between mb-step-md">
             <div>
               <div className="flex items-center gap-step-xs">
@@ -1525,12 +1525,12 @@ function ProfitAnalyticsPage({
               </div>
             </div>
           </div>
-          <div className="relative w-full h-64 bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[inset_2px_2px_0_0_#050300]">
+          <div className="relative w-full h-64 bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[inset_2px_2px_0_0_#1c3621]">
             <canvas ref={financeChartRef} className="w-full h-full"></canvas>
           </div>
           <div className="mt-step-sm grid grid-cols-1 sm:grid-cols-3 gap-step-sm pt-step-xs border-t-2 border-surface-dim">
             <div className="flex items-center gap-step-sm">
-              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#050300]">
+              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#1c3621]">
                 <span className="material-symbols-outlined text-[16px] text-primary">trending_up</span>
               </div>
               <div>
@@ -1539,7 +1539,7 @@ function ProfitAnalyticsPage({
               </div>
             </div>
             <div className="flex items-center gap-step-sm">
-              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#050300]">
+              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#1c3621]">
                 <span className="material-symbols-outlined text-[16px] text-error">trending_down</span>
               </div>
               <div>
@@ -1548,7 +1548,7 @@ function ProfitAnalyticsPage({
               </div>
             </div>
             <div className="flex items-center gap-step-sm">
-              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#050300]">
+              <div className="w-7 h-7 bg-surface-container flex items-center justify-center border border-inverse-surface shadow-[2px_2px_0_0_#1c3621]">
                 <span className="material-symbols-outlined text-[16px] text-primary">bolt</span>
               </div>
               <div>
@@ -1560,10 +1560,10 @@ function ProfitAnalyticsPage({
         </div>
 
         {/* LEDGER TABLE */}
-        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300] flex flex-col gap-step-md">
+        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#1c3621] flex flex-col gap-step-md">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-step-md">
             <div className="flex items-center gap-step-sm">
-              <div className="w-8 h-8 bg-inverse-surface text-tertiary-fixed-dim flex items-center justify-center shadow-[2px_2px_0_0_#1E0E02]">
+              <div className="w-8 h-8 bg-inverse-surface text-tertiary-fixed-dim flex items-center justify-center shadow-[2px_2px_0_0_#06200d]">
                 <span className="material-symbols-outlined text-[20px]">menu_book</span>
               </div>
               <div>
@@ -1584,7 +1584,7 @@ function ProfitAnalyticsPage({
               </div>
               <div className="flex items-center gap-step-xs">
                 {[['ALL', 'SEMUA'], ['PROFIT', 'MASUK'], ['LOSS', 'KELUAR']].map(([val, label]) => (
-                  <button key={val} onClick={() => setTypeFilter(val)} className={`px-step-sm py-step-xs font-label-sm text-label-sm border border-inverse-surface pixel-btn ${typeFilter === val ? 'bg-inverse-surface text-tertiary-fixed-dim font-bold shadow-[2px_2px_0_0_#1E0E02]' : 'bg-surface-container text-on-surface-variant shadow-[2px_2px_0_0_#050300]'}`}>
+                  <button key={val} onClick={() => setTypeFilter(val)} className={`px-step-sm py-step-xs font-label-sm text-label-sm border border-inverse-surface pixel-btn ${typeFilter === val ? 'bg-inverse-surface text-tertiary-fixed-dim font-bold shadow-[2px_2px_0_0_#06200d]' : 'bg-surface-container text-on-surface-variant shadow-[2px_2px_0_0_#1c3621]'}`}>
                     {label}
                   </button>
                 ))}
@@ -1592,7 +1592,7 @@ function ProfitAnalyticsPage({
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto border-2 border-inverse-surface shadow-[3px_3px_0_0_#050300]">
+          <div className="w-full overflow-x-auto border-2 border-inverse-surface shadow-[3px_3px_0_0_#1c3621]">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b-2 border-inverse-surface font-label-sm text-label-sm text-on-surface uppercase">
@@ -1639,7 +1639,7 @@ function ProfitAnalyticsPage({
                         </span>
                       </td>
                       <td className="py-step-sm px-step-md text-right whitespace-nowrap">
-                        <button onClick={() => deleteTransaction(tx.id)} className="opacity-0 group-hover:opacity-100 p-pixel-unit hover:bg-surface-dim border border-inverse-surface shadow-[1px_1px_0_0_#050300] transition-opacity pixel-btn">
+                        <button onClick={() => deleteTransaction(tx.id)} className="opacity-0 group-hover:opacity-100 p-pixel-unit hover:bg-surface-dim border border-inverse-surface shadow-[1px_1px_0_0_#1c3621] transition-opacity pixel-btn">
                           <span className="material-symbols-outlined text-[16px] text-error">delete</span>
                         </button>
                       </td>
@@ -1666,10 +1666,10 @@ function ProfitAnalyticsPage({
 function AssetVaultPage() {
   return (
     <div className="flex flex-col w-full animate-entrance">
-      <div className="relative w-full overflow-hidden bg-surface-container-high px-step-lg py-step-lg shadow-[4px_4px_0_0_#050300]">
+      <div className="relative w-full overflow-hidden bg-surface-container-high px-step-lg py-step-lg shadow-[4px_4px_0_0_#1c3621]">
         <div className="relative z-10">
           <div className="flex items-center gap-step-sm mb-step-xs">
-            <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#050300]">
+            <span className="font-label-sm text-label-sm bg-inverse-surface text-tertiary-fixed-dim px-step-sm py-pixel-unit shadow-[2px_2px_0_0_#1c3621]">
               SECURE VAULT // REALM ARCHIVE
             </span>
           </div>
@@ -1680,8 +1680,8 @@ function AssetVaultPage() {
         </div>
       </div>
       <div className="p-step-lg flex flex-col items-center justify-center min-h-[60vh] gap-step-lg">
-        <div className="bg-surface-container border-2 border-inverse-surface p-step-3xl shadow-[8px_8px_0_0_#050300] flex flex-col items-center gap-step-lg text-center max-w-md">
-          <div className="w-24 h-24 bg-inverse-surface flex items-center justify-center text-tertiary-fixed-dim shadow-[inset_4px_4px_0_0_#050300]">
+        <div className="bg-surface-container border-2 border-inverse-surface p-step-3xl shadow-[8px_8px_0_0_#1c3621] flex flex-col items-center gap-step-lg text-center max-w-md">
+          <div className="w-24 h-24 bg-inverse-surface flex items-center justify-center text-tertiary-fixed-dim shadow-[inset_4px_4px_0_0_#00210c]">
             <span className="material-symbols-outlined text-[56px]">lock</span>
           </div>
           <div>
@@ -1837,7 +1837,7 @@ function App() {
         datasets: [{
           label: 'Net Worth (IDR)',
           data,
-          borderColor: '#6B3A1F',
+          borderColor: '#006c49',
           backgroundColor: grad,
           borderWidth: 3,
           fill: true,
@@ -1855,16 +1855,16 @@ function App() {
           y: {
             position: 'right',
             grid: { color: 'rgba(28, 54, 33, 0.15)' },
-            ticks: { color: '#9A7A50', callback: v => formatIDR(v) }
+            ticks: { color: '#3c4a42', callback: v => formatIDR(v) }
           },
           x: { grid: { display: false }, ticks: { display: false } }
         },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#050300',
-            titleColor: '#C89020',
-            bodyColor: '#241608',
+            backgroundColor: '#1c3621',
+            titleColor: '#4de082',
+            bodyColor: '#dcfcdc',
             callbacks: { label: ctx => ` ${formatIDR(ctx.parsed.y)}` }
           }
         }
@@ -2121,7 +2121,7 @@ function App() {
             onClick={() => setSelectedDate(cloneDay)}
             className={`p-step-xs h-14 flex flex-col justify-between text-left cursor-pointer transition-colors ${
               !isCurrentMonth ? 'bg-surface-container-low opacity-40' :
-              isSelectedDay ? 'bg-surface-container-high border-2 border-primary-container shadow-[inset_0_0_4px_#5C3A10]' :
+              isSelectedDay ? 'bg-surface-container-high border-2 border-primary-container shadow-[inset_0_0_4px_#10b981]' :
               isToday ? 'bg-primary-container/20 border-2 border-primary-container' :
               'bg-surface-container-low hover:bg-surface-container'
             }`}
@@ -2157,7 +2157,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="bg-surface-container border-2 border-inverse-surface p-step-xl shadow-[8px_8px_0_0_#050300] flex flex-col items-center gap-step-lg">
+        <div className="bg-surface-container border-2 border-inverse-surface p-step-xl shadow-[8px_8px_0_0_#1c3621] flex flex-col items-center gap-step-lg">
           <div className="w-16 h-16 bg-inverse-surface flex items-center justify-center border-2 border-inverse-surface">
             <span className="material-symbols-outlined text-tertiary-fixed-dim text-[40px]">hourglass_top</span>
           </div>
@@ -2239,4 +2239,3 @@ function App() {
 }
 
 export default App;
-

@@ -8,54 +8,73 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Forest Realm - QUESTFOLIO Design Tokens
-        "on-tertiary-fixed": "#00210c",
-        "tertiary-fixed-dim": "#4de082",
-        "on-error": "#ffffff",
-        "on-primary-container": "#00422b",
-        "primary-container": "#10b981",
-        "surface": "#eaffe8",
-        "on-primary": "#ffffff",
-        "surface-variant": "#cbebcb",
-        "inverse-primary": "#4edea3",
-        "outline-variant": "#bbcabf",
-        "on-primary-fixed": "#002113",
-        "surface-container-highest": "#cbebcb",
-        "surface-bright": "#eaffe8",
-        "error-container": "#ffdad6",
-        "surface-dim": "#c3e2c3",
-        "error": "#ba1a1a",
-        "on-tertiary-fixed-variant": "#005227",
-        "surface-container-lowest": "#ffffff",
-        "on-surface": "#06200d",
-        "on-background": "#06200d",
-        "secondary-fixed-dim": "#aecfa9",
-        "on-error-container": "#93000a",
-        "tertiary": "#006d36",
-        "secondary": "#486646",
-        "surface-tint": "#006c49",
-        "on-tertiary": "#ffffff",
-        "inverse-on-surface": "#d9f9d9",
-        "surface-container": "#d6f6d7",
-        "surface-container-high": "#d1f0d1",
-        "secondary-container": "#c9ecc4",
-        "primary": "#006c49",
-        "on-secondary": "#ffffff",
-        "on-secondary-container": "#4d6c4c",
-        "on-surface-variant": "#3c4a42",
-        "outline": "#6c7a71",
-        "primary-fixed": "#6ffbbe",
-        "on-primary-fixed-variant": "#005236",
-        "primary-fixed-dim": "#4edea3",
-        "on-secondary-fixed-variant": "#304e30",
-        "on-secondary-fixed": "#042108",
-        "secondary-fixed": "#c9ecc4",
-        "background": "#eaffe8",
-        "inverse-surface": "#1c3621",
-        "tertiary-container": "#11bb62",
-        "tertiary-fixed": "#6dfe9c",
-        "surface-container-low": "#dcfcdc",
-        "on-tertiary-container": "#00431e",
+        // ============================================================
+        // MINECRAFT ENCHANTED DARK FOREST — QUESTFOLIO Design Tokens
+        // Vibe: Dark oak logs · Deep forest greens · Golden lantern glow
+        // ============================================================
+
+        // ── BACKGROUNDS — deep dark forest floor / night ──
+        "background":                "#0A0702",   // near-black forest night
+        "surface":                   "#160C04",   // very dark surface
+        "surface-bright":            "#221408",   // slightly lighter dark oak
+        "surface-dim":               "#0C0802",   // darker than surface
+        "surface-variant":           "#2A1A0C",   // bark variant
+
+        // Surface containers — dark oak log layers
+        "surface-container-lowest":  "#100804",
+        "surface-container-low":     "#1A1006",   // dark oak low
+        "surface-container":         "#241608",   // dark oak mid
+        "surface-container-high":    "#2E1E0C",   // dark oak high
+        "surface-container-highest": "#3A2512",   // slightly exposed bark
+
+        // ── PRIMARY — Golden Lantern / Torch light ──
+        "primary":                   "#C89020",   // warm lantern gold
+        "primary-container":         "#5C3A10",   // dark oak container
+        "primary-fixed":             "#FFD060",   // bright torch glow
+        "primary-fixed-dim":         "#D4A830",
+        "inverse-primary":           "#3A2408",
+        "on-primary":                "#1A0E02",
+        "on-primary-container":      "#FFD880",   // warm gold text
+        "on-primary-fixed":          "#1A0E02",
+        "on-primary-fixed-variant":  "#3A2208",
+
+        // ── SECONDARY — Enchanted Forest Leaf Green ──
+        "secondary":                 "#4A9A20",   // vibrant leaf green
+        "secondary-container":       "#1A3A08",   // deep forest green
+        "secondary-fixed":           "#90E050",
+        "secondary-fixed-dim":       "#60B830",
+        "on-secondary":              "#0A1A02",
+        "on-secondary-container":    "#B0F060",   // bright leaf text
+        "on-secondary-fixed":        "#0A1A02",
+        "on-secondary-fixed-variant":"#1A3A0A",
+
+        // ── TERTIARY — Mossy Stone / Mushroom cream ──
+        "tertiary":                  "#8A7A50",   // mossy stone
+        "tertiary-container":        "#3A3018",   // dark mossy
+        "tertiary-fixed":            "#C8B870",
+        "tertiary-fixed-dim":        "#A09850",
+        "on-tertiary":               "#FFFFFF",
+        "on-tertiary-fixed":         "#1A1502",
+        "on-tertiary-fixed-variant": "#3A3010",
+        "on-tertiary-container":     "#F0D890",
+
+        // ── ERROR — Redstone ──
+        "error":                     "#E05050",
+        "error-container":           "#4A0808",
+        "on-error":                  "#FFFFFF",
+        "on-error-container":        "#FFAAAA",
+
+        // ── INVERSE — Light Birch (for contrast elements) ──
+        "inverse-surface":           "#D4C090",   // aged birch / parchment
+        "inverse-on-surface":        "#1A0E06",
+        "surface-tint":              "#C89020",
+
+        // ── TEXT — Warm cream by lantern light ──
+        "on-surface":                "#E8D4A0",   // warm parchment text
+        "on-background":             "#E8D4A0",
+        "on-surface-variant":        "#9A7A50",   // dim warm bark text
+        "outline":                   "#5A3E20",   // medium bark outline
+        "outline-variant":           "#3A2810",   // dark bark outline
       },
       borderRadius: {
         "DEFAULT": "0.25rem",
@@ -89,7 +108,6 @@ export default {
         "headline-md": ["Space Grotesk", "sans-serif"],
         "label-lg": ["JetBrains Mono", "monospace"],
         "label-md": ["JetBrains Mono", "monospace"],
-        // Legacy aliases kept for compatibility
         "section-title": ["Space Grotesk", "sans-serif"],
         "headline-display": ["Space Grotesk", "sans-serif"],
         "body-base": ["Space Grotesk", "sans-serif"],
