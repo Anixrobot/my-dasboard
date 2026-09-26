@@ -4,12 +4,192 @@ import Chart from 'chart.js/auto';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, getYear, getMonth, subDays } from 'date-fns';
 
 // ============================================================
-// QUESTFOLIO — Forest Realm Dashboard
-// Design System: Space Grotesk + JetBrains Mono, Emerald Pixel UI
+// QUESTFOLIO — Minecraft Enchanted Forest Dashboard
+// Design System: Space Grotesk + JetBrains Mono, Dark Oak Pixel UI
 // ============================================================
 
 // --- Logo Image URL ---
 const LOGO_URL = "https://lh3.googleusercontent.com/aida/AEtjO1Vu6KWUXzj0k3ZiG7gzse_YAjiVcrMTgaevJ1NgEV-HZmKOXPuCjiQz1HZL-KaecZOABEKB3H3Bj8YFZ_ABOGCiBYWK1IsQ4yzATAjbwxqffNYbOZbebdpfYG_nkHq8TWOzukBSOSCho8aFaOU9D5mqcU82c2SKVGXzA-2FOEXERun5-bnOigm3-kGL_N-SSU2vL5rfcPPPCAdua9rzejrKWbOgV5LuWiRGZU2RA3Ta6EllVgMlZYZ1meA";
+
+// ============================================================
+// PANEL VINES — Corner Decorations for individual panels
+// ============================================================
+function PanelVines() {
+  const VINE_GREEN = '#2D5A14';
+  const VINE_BRIGHT = '#4A8C28';
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 10 }}>
+      {/* Top Left Corner */}
+      <svg className="absolute top-0 left-0 w-16 h-16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 32 Q16 32 32 16 Q48 0 64 0" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        <path d="M0 16 Q8 16 16 8 Q24 0 32 0" stroke={VINE_GREEN} strokeWidth="2" strokeLinecap="round"/>
+        <ellipse cx="24" cy="24" rx="4" ry="2" fill={VINE_BRIGHT} transform="rotate(-45 24 24)"/>
+        <ellipse cx="40" cy="8" rx="4" ry="2" fill={VINE_GREEN} transform="rotate(-30 40 8)"/>
+        {/* Tiny pink flower */}
+        <rect x="12" y="32" width="6" height="6" fill="#D84898"/>
+        <rect x="14" y="34" width="2" height="2" fill="#FFD060"/>
+      </svg>
+      {/* Bottom Right Corner */}
+      <svg className="absolute bottom-0 right-0 w-16 h-16" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M64 32 Q48 32 32 48 Q16 64 0 64" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        <path d="M64 48 Q56 48 48 56 Q40 64 32 64" stroke={VINE_GREEN} strokeWidth="2" strokeLinecap="round"/>
+        <ellipse cx="40" cy="40" rx="4" ry="2" fill={VINE_BRIGHT} transform="rotate(-45 40 40)"/>
+        <ellipse cx="24" cy="56" rx="4" ry="2" fill={VINE_GREEN} transform="rotate(-30 24 56)"/>
+        {/* Tiny orange flower */}
+        <rect x="44" y="24" width="6" height="6" fill="#FF9020"/>
+        <rect x="46" y="26" width="2" height="2" fill="#FFD060"/>
+      </svg>
+    </div>
+  );
+}
+
+
+
+// ============================================================
+// VINE OVERLAY — Enchanted Forest Pixel Art Border Decoration
+// ============================================================
+const VINE_GREEN  = '#2D5A14';
+const VINE_LIGHT  = '#3D7A20';
+const VINE_BRIGHT = '#4A8C28';
+const LEAF_DARK   = '#1A3A08';
+
+function PixelFlowerPink({ x, y, scale = 1 }) {
+  const s = scale * 4;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <rect x={s} y={0}     width={s} height={s} fill="#D84898"/>
+      <rect x={0} y={s}     width={s*3} height={s} fill="#E060A8"/>
+      <rect x={-s} y={s*2}  width={s*5} height={s} fill="#D84898"/>
+      <rect x={0} y={s*3}   width={s*3} height={s} fill="#E060A8"/>
+      <rect x={s} y={s*4}   width={s} height={s} fill="#D84898"/>
+      {/* center */}
+      <rect x={s*0.5} y={s*1.5} width={s*2} height={s*2} fill="#FFD060"/>
+      <rect x={s}     y={s*2}   width={s} height={s}     fill="#FFA020"/>
+      {/* stem */}
+      <rect x={s+2} y={s*5} width={4} height={s*3} fill={VINE_GREEN}/>
+    </g>
+  );
+}
+
+function PixelFlowerOrange({ x, y, scale = 1 }) {
+  const s = scale * 3;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <rect x={s}   y={0}   width={s} height={s} fill="#FF9020"/>
+      <rect x={0}   y={s}   width={s*3} height={s} fill="#FFAA30"/>
+      <rect x={s}   y={s*2} width={s} height={s} fill="#FF9020"/>
+      <rect x={s+1} y={s}   width={s-2} height={s} fill="#FFD060"/>
+      {/* stem */}
+      <rect x={s+1} y={s*3} width={3} height={s*2} fill={VINE_GREEN}/>
+    </g>
+  );
+}
+
+function PixelMushroom({ x, y, scale = 1 }) {
+  const s = scale * 4;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {/* cap */}
+      <rect x={-s} y={0}      width={s}   height={s}   fill="#C8A870"/>
+      <rect x={0}  y={-s*0.5} width={s*3} height={s*1.5} fill="#D4B880"/>
+      <rect x={s*3} y={0}     width={s}   height={s}   fill="#C8A870"/>
+      <rect x={0}  y={s}      width={s*3} height={s*0.5} fill="#B89060"/>
+      {/* stem */}
+      <rect x={s*0.5} y={s*1.5} width={s*2} height={s*2.5} fill="#E8D8A8"/>
+      <rect x={s}     y={s*1.5} width={s}   height={s*2.5} fill="#F0E0B8"/>
+    </g>
+  );
+}
+
+function VineOverlay() {
+  // Blue firefly dots: [x_offset_from_edge, top, side]
+  const leftDots  = [[168,200],[152,278],[172,355],[160,432],[174,510],[155,588],[163,666]];
+  const rightDots = [[14,230],[6,310],[18,390],[8,470],[16,550],[5,630],[12,710]];
+
+  // Leaf positions along vine: [cx, cy, rx, ry, rotate]
+  const leftLeaves = [
+    [130,690,15,7,-22],[92,678,12,5,15],[58,668,10,5,-10],
+    [118,530,14,6,-26],[82,522,12,5,20],[50,514,10,5,-14],
+    [122,370,13,6,-20],[92,362,11,5,16],[67,353,9,4,-8],
+    [120,212,13,6,-23],[90,203,11,5,18],[64,194,9,4,-10],
+  ];
+
+  return (
+    <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 48, pointerEvents: 'none' }}>
+
+      {/* ═══ LEFT VINE ═══ */}
+      <svg className="absolute left-0 top-0 h-full" width="200" viewBox="0 0 200 900"
+           preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Main stem */}
+        <path d="M158 900 Q152 800 162 718 Q172 636 150 558 Q132 480 156 400 Q176 322 146 242 Q126 180 152 118 Q159 82 156 48 Q153 24 157 0"
+          fill="none" stroke={VINE_GREEN} strokeWidth="5" strokeLinecap="round"/>
+        {/* Side branches */}
+        <path d="M162 718 Q132 706 112 698 Q88 686 66 676" fill="none" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        <path d="M150 558 Q122 543 100 537 Q78 530 52 520" fill="none" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        <path d="M156 400 Q128 385 106 378 Q82 369 58 359" fill="none" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        <path d="M146 242 Q124 228 102 219 Q78 209 54 199" fill="none" stroke={VINE_GREEN} strokeWidth="3" strokeLinecap="round"/>
+        {/* Leaves */}
+        {leftLeaves.map(([cx,cy,rx,ry,rot],i) => (
+          <ellipse key={i} cx={cx} cy={cy} rx={rx} ry={ry} fill={i%3===0?VINE_GREEN:i%3===1?LEAF_DARK:VINE_BRIGHT} transform={`rotate(${rot},${cx},${cy})`}/>
+        ))}
+        {/* Pink flowers */}
+        <PixelFlowerPink x={52} y={620} scale={1.1}/>
+        <PixelFlowerPink x={30} y={450} scale={1.0}/>
+        <PixelFlowerPink x={46} y={270} scale={0.9}/>
+        {/* Orange flowers */}
+        <PixelFlowerOrange x={95} y={320} scale={1.0}/>
+        <PixelFlowerOrange x={72} y={178} scale={0.9}/>
+        <PixelFlowerOrange x={110} y={490} scale={0.85}/>
+        {/* Mushrooms at bottom */}
+        <PixelMushroom x={55} y={810} scale={1.2}/>
+        <PixelMushroom x={92} y={828} scale={0.9}/>
+        <PixelMushroom x={22} y={840} scale={0.8}/>
+        {/* Ground grass line */}
+        <rect x="0" y="868" width="200" height="32" fill={LEAF_DARK} opacity="0.85"/>
+        <rect x="0" y="858" width="200" height="12" fill={VINE_GREEN} opacity="0.6"/>
+        {[12,24,38,52,68,82,98,114,128,144,160,175].map((x,i) => (
+          <rect key={i} x={x} y={848} width={i%2===0?4:3} height={10+(i%3)*2}
+            fill={i%2===0?VINE_BRIGHT:VINE_GREEN}
+            transform={`rotate(${i%2===0?-6:7},${x+2},855)`}/>
+        ))}
+      </svg>
+
+      {/* Left firefly dots */}
+      {leftDots.map(([left, top], i) => (
+        <div key={`ld${i}`} style={{
+          position:'absolute', left, top,
+          width:6, height:6,
+          background:'#4488FF',
+          boxShadow:'0 0 8px #4488FF, 0 0 18px rgba(68,136,255,0.5)',
+        }}/>
+      ))}
+
+      {/* ═══ RIGHT VINE (mirrored) ═══ */}
+      <svg className="absolute right-0 top-0 h-full" width="40" viewBox="0 0 40 900"
+           preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0 Q12 80 8 160 Q4 260 10 360 Q16 460 8 560 Q2 660 10 760 Q16 830 10 900"
+          fill="none" stroke={VINE_GREEN} strokeWidth="4" strokeLinecap="round"/>
+        {[150,300,450,600,750].map((cy,i) => (
+          <ellipse key={i} cx={20} cy={cy} rx={14} ry={6} fill={i%2===0?VINE_BRIGHT:VINE_GREEN} transform={`rotate(${i%2===0?20:-15},20,${cy})`}/>
+        ))}
+        <rect x="0" y="868" width="40" height="32" fill={LEAF_DARK} opacity="0.85"/>
+        <rect x="0" y="858" width="40" height="12" fill={VINE_GREEN} opacity="0.6"/>
+      </svg>
+
+      {/* Right firefly dots */}
+      {rightDots.map(([right, top], i) => (
+        <div key={`rd${i}`} style={{
+          position:'absolute', right, top,
+          width:6, height:6,
+          background:'#4488FF',
+          boxShadow:'0 0 8px #4488FF, 0 0 18px rgba(68,136,255,0.5)',
+        }}/>
+      ))}
+    </div>
+  );
+}
+
+
 
 // ============================================================
 // SHARED SIDEBAR
@@ -880,7 +1060,9 @@ function StudyWorkspacePage({
       <div className="p-step-lg grid grid-cols-1 lg:grid-cols-12 gap-step-lg">
 
         {/* LEFT: Checklist / Targets */}
-        <div className="lg:col-span-3 flex flex-col gap-step-md">
+        <div className="lg:col-span-3 flex flex-col gap-step-md relative bg-surface-container-low border-2 border-inverse-surface p-step-sm shadow-[4px_4px_0_0_#050300]">
+          <PanelVines />
+          <div className="relative z-20 flex flex-col gap-step-md">
           {/* Section Header */}
           <div className="bg-surface-container border-2 border-inverse-surface p-step-sm shadow-[3px_3px_0_0_#050300] flex items-center justify-between">
             <div className="flex items-center gap-step-xs">
@@ -1002,13 +1184,16 @@ function StudyWorkspacePage({
               </p>
             </div>
           </div>
+          </div>
         </div>
 
         {/* CENTER: Calendar + Quest Timeline */}
         <div className="lg:col-span-5 flex flex-col gap-step-md">
           {/* Calendar */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
-            <div className="flex items-center justify-between mb-step-sm">
+          <div className="relative bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+            <PanelVines />
+            <div className="relative z-20">
+              <div className="flex items-center justify-between mb-step-sm">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
                 <h2 className="font-headline-sm text-headline-sm text-on-surface">STUDY CALENDAR</h2>
@@ -1056,11 +1241,14 @@ function StudyWorkspacePage({
                 />
               </div>
             </div>
+            </div>
           </div>
 
           {/* Daily Quest Log */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
-            <div className="flex items-center justify-between mb-step-md">
+          <div className="relative bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
+            <PanelVines />
+            <div className="relative z-20 flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-step-md">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">format_list_bulleted</span>
                 <h2 className="font-headline-sm text-headline-sm text-on-surface">TODAY'S QUEST LOG</h2>
@@ -1102,14 +1290,17 @@ function StudyWorkspacePage({
               placeholder="+ Tambah quest baru... (Enter)"
               className="mt-step-md w-full py-step-sm px-step-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-2 border-inverse-surface font-label-md text-label-md shadow-[3px_3px_0_0_#050300] outline-none focus:border-primary"
             />
+            </div>
           </div>
         </div>
 
         {/* RIGHT: Pinboard + Scratchpad */}
         <div className="lg:col-span-4 flex flex-col gap-step-md">
           {/* Guild Pinboard */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
-            <div className="flex items-center justify-between mb-step-sm">
+          <div className="relative bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+            <PanelVines />
+            <div className="relative z-20">
+              <div className="flex items-center justify-between mb-step-sm">
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">push_pin</span>
                 <h2 className="font-headline-sm text-headline-sm text-on-surface">GUILD PINBOARD</h2>
@@ -1193,14 +1384,17 @@ function StudyWorkspacePage({
                 />
               </div>
             </div>
+            </div>
           </div>
 
           {/* Scratchpad */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
-            <div className="flex items-center justify-between mb-step-xs">
-              <div className="flex items-center gap-step-xs">
-                <span className="material-symbols-outlined text-primary text-[20px]">history_edu</span>
-                <h2 className="font-headline-sm text-headline-sm text-on-surface">SPELL SCROLL SCRATCHPAD</h2>
+          <div className="relative bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300] flex flex-col flex-1">
+            <PanelVines />
+            <div className="relative z-20 flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-step-xs">
+                <div className="flex items-center gap-step-xs">
+                  <span className="material-symbols-outlined text-primary text-[20px]">history_edu</span>
+                  <h2 className="font-headline-sm text-headline-sm text-on-surface">SPELL SCROLL SCRATCHPAD</h2>
               </div>
               <span className="font-label-sm text-[10px] bg-inverse-surface text-tertiary-fixed-dim px-step-xs py-pixel-unit">MARKDOWN</span>
             </div>
@@ -1223,15 +1417,18 @@ function StudyWorkspacePage({
                 <span>SAVE SCROLL</span>
               </button>
             </div>
+            </div>
           </div>
 
           {/* ═══ ENCHANTED BOOKSHELF ═══ */}
-          <div className="bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-step-md">
-              <div className="flex items-center gap-step-xs">
-                <span className="material-symbols-outlined text-primary text-[20px]">auto_stories</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface">ENCHANTED BOOKSHELF</span>
+          <div className="relative bg-surface-container border-2 border-inverse-surface p-step-md shadow-[4px_4px_0_0_#050300]">
+            <PanelVines />
+            <div className="relative z-20">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-step-md">
+                <div className="flex items-center gap-step-xs">
+                  <span className="material-symbols-outlined text-primary text-[20px]">auto_stories</span>
+                  <span className="font-headline-sm text-headline-sm text-on-surface">ENCHANTED BOOKSHELF</span>
                 <span className="bg-inverse-surface text-tertiary-fixed-dim font-label-sm text-[10px] px-step-xs py-pixel-unit border border-inverse-surface">
                   {(noteBlocks || []).length} BUKU
                 </span>
@@ -1347,6 +1544,7 @@ function StudyWorkspacePage({
             {/* Shelf rail bottom */}
             <div className="h-3 bg-inverse-surface mt-step-sm shadow-[0_3px_0_0_#050300]" />
             <div className="h-1 bg-[#1A0E06] mt-[2px]" />
+            </div>
           </div>
 
           {/* BookModal — renders into body when a book is open */}
@@ -1495,7 +1693,7 @@ function ProfitAnalyticsPage({
             { label: 'Win Rate', value: `${winRate}%`, color: 'text-on-surface', icon: 'verified', sub: `${wins} Wins / ${losses} Losses` },
             { label: 'ROI', value: `${roi}%`, color: parseFloat(roi) >= 0 ? 'text-primary' : 'text-error', icon: 'percent', sub: `Modal: ${gtModalDL.toFixed(2)} DL` },
           ].map((card, i) => (
-            <div key={i} className={`bg-surface-container-low p-step-md flex flex-col justify-between shadow-[4px_4px_0_0_#050300] hover:-translate-y-0.5 transition-transform ${card.highlight ? 'ring-2 ring-primary-container' : ''} border-2 border-inverse-surface`}>
+            <div key={i} className={`relative bg-surface-container-low p-step-md flex flex-col justify-between shadow-[4px_4px_0_0_#050300] hover:-translate-y-0.5 transition-transform ${card.highlight ? 'ring-2 ring-primary-container' : ''} border-2 border-inverse-surface`}><PanelVines />
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-on-surface-variant uppercase">{card.label}</span>
                 <span className="material-symbols-outlined text-primary text-[20px]">{card.icon}</span>
@@ -1509,8 +1707,9 @@ function ProfitAnalyticsPage({
         </div>
 
         {/* CHART */}
-        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300]">
-          <div className="flex items-center justify-between mb-step-md">
+        <div className="relative bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300]">
+          <PanelVines />
+          <div className="relative z-20 flex items-center justify-between mb-step-md">
             <div>
               <div className="flex items-center gap-step-xs">
                 <span className="material-symbols-outlined text-primary text-[20px]">show_chart</span>
@@ -1560,8 +1759,9 @@ function ProfitAnalyticsPage({
         </div>
 
         {/* LEDGER TABLE */}
-        <div className="bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300] flex flex-col gap-step-md">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-step-md">
+        <div className="relative bg-surface-container-low border-2 border-inverse-surface p-step-md sm:p-step-lg shadow-[4px_4px_0_0_#050300] flex flex-col gap-step-md">
+          <PanelVines />
+          <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-step-md">
             <div className="flex items-center gap-step-sm">
               <div className="w-8 h-8 bg-inverse-surface text-tertiary-fixed-dim flex items-center justify-center shadow-[2px_2px_0_0_#1E0E02]">
                 <span className="material-symbols-outlined text-[20px]">menu_book</span>
@@ -2119,14 +2319,23 @@ function App() {
           <div
             key={day.toString()}
             onClick={() => setSelectedDate(cloneDay)}
-            className={`p-step-xs h-14 flex flex-col justify-between text-left cursor-pointer transition-colors ${
+            className={`relative p-step-xs h-14 flex flex-col justify-between text-left cursor-pointer transition-colors ${
               !isCurrentMonth ? 'bg-surface-container-low opacity-40' :
               isSelectedDay ? 'bg-surface-container-high border-2 border-primary-container shadow-[inset_0_0_4px_#5C3A10]' :
               isToday ? 'bg-primary-container/20 border-2 border-primary-container' :
               'bg-surface-container-low hover:bg-surface-container'
             }`}
           >
-            <span className={`font-label-sm text-[11px] ${isToday ? 'text-primary font-bold' : isSelectedDay ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>
+            {/* Random small vine on some dates */}
+            {(cloneDay.getDate() % 7 === 3 || cloneDay.getDate() % 11 === 0) && (
+              <svg className="absolute bottom-0 right-0 w-6 h-6 pointer-events-none" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 12 Q18 12 12 18 Q6 24 0 24" stroke="#2D5A14" strokeWidth="2" strokeLinecap="round"/>
+                <ellipse cx="12" cy="18" rx="2" ry="1" fill="#4A8C28" transform="rotate(-45 12 18)"/>
+                {cloneDay.getDate() % 2 === 0 && <rect x="8" y="18" width="3" height="3" fill="#D84898" />}
+                {cloneDay.getDate() % 2 !== 0 && <rect x="14" y="14" width="3" height="3" fill="#FF9020" />}
+              </svg>
+            )}
+            <span className={`relative z-10 font-label-sm text-[11px] ${isToday ? 'text-primary font-bold' : isSelectedDay ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>
               {format(day, 'd')}
             </span>
             {dayTasks.length > 0 && (
@@ -2210,6 +2419,7 @@ function App() {
   // ===== RENDER =====
   return (
     <div className="bg-background font-body-md text-body-md text-on-surface antialiased">
+      <VineOverlay />
       <Sidebar activePage={activePage} setActivePage={setActivePage} />
       <div className="pl-72">
         <Header
@@ -2239,4 +2449,6 @@ function App() {
 }
 
 export default App;
+
+
 
